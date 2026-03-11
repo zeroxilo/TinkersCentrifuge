@@ -1,0 +1,8 @@
+{
+  "parent": "tconstruct:block/template/basin",
+  "textures": {
+    "top": "tinkerscentrifuge:block/centrifuge_top",
+    "side": "tinkerscentrifuge:block/centrifuge_side",
+    "bottom": "tinkerscentrifuge:block/centrifuge_bottom"
+  }
+}
