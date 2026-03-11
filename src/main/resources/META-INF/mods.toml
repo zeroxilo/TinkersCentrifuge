@@ -6,7 +6,7 @@ modId = "tinkerscentrifuge" #mandatory
 version = "0.0.1" #mandatory
 displayName = "Tinkers' Centrifuge" #mandatory
 logoFile = "icon.png"
-authors = "ZeroXilo"
+authors = "SlimeGirl"
 description = '''
 
 '''

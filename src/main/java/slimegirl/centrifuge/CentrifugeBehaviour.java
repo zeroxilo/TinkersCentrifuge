@@ -1,4 +1,4 @@
-package com.slimegirl.centrifuge;
+package slimegirl.centrifuge;
 
 public class CentrifugeBehaviour {
     

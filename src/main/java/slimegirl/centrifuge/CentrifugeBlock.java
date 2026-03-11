@@ -1,4 +1,4 @@
-package com.slimegirl.centrifuge;
+package slimegirl.centrifuge;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
@@ -15,6 +15,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.AbstractCastingBlock;
 import slimeknights.tconstruct.smeltery.block.entity.CastingBlockEntity;
+import slimegirl.centrifuge.CentrifugeBlockEntity;
 
 import javax.annotation.Nullable;
 
@@ -45,14 +46,15 @@ public class CentrifugeBlock extends AbstractCastingBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
-        //return new TinkersCentrifugeBlockEntity.Basin(pPos, pState);
-        return new CastingBlockEntity.Basin(pPos, pState);
+        return new CentrifugeBlockEntity(pPos, pState);
+        //return new CastingBlockEntity.Basin(pPos, pState);
     }
 
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> check) {
-        //return TinkersCentrifugeBlockEntity.getTicker(pLevel, check, TinkerSmeltery.basin.get());
-        return CastingBlockEntity.getTicker(pLevel, check, TinkerSmeltery.basin.get());
+        return CentrifugeBlockEntity.getTicker(pLevel, check, null);
+        //return CentrifugeBlockEntity.getTicker(pLevel, check, TinkerSmeltery.basin.get());
+        //return CastingBlockEntity.getTicker(pLevel, check, TinkerSmeltery.basin.get());
     }
 }
