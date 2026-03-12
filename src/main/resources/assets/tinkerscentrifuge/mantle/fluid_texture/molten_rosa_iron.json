@@ -1,13 +1,13 @@
 {
-  "camera": "tinkerscentrifuge:fluid/molten/rosa_iron/camera",
+  "camera": "tinkerscentrifuge:fluid/molten/rosa_iron_camera",
   "camera_opacity": 0.1,
   "color": "FFFFFFFF",
-  "flowing": "tinkerscentrifuge:fluid/molten/rosa_iron/flowing",
+  "flowing": "tinkerscentrifuge:fluid/molten/rosa_iron_flowing",
   "fog": {
     "calculate_color": true,
     "end": 2.0,
     "shape": "sphere",
     "start": 0.25
   },
-  "still": "tinkerscentrifuge:fluid/molten/rosa_iron/still"
+  "still": "tinkerscentrifuge:fluid/molten/rosa_iron_still"
 }

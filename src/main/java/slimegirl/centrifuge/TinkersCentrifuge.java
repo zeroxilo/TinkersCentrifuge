@@ -37,11 +37,12 @@ import org.slf4j.Logger;
 @Mod(TinkersCentrifuge.MODID)
 public class TinkersCentrifuge{
     public static final String MODID = "tinkerscentrifuge";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(ForgeRegistries.FLUIDS, MODID);
+    public static final DeferredRegister<FluidType> FLUID_TYPES = DeferredRegister.create(ForgeRegistries.Keys.FLUID_TYPES, MODID);
     
     protected static final Item.Properties ITEM_PROPS = new Item.Properties();
 
@@ -78,16 +79,21 @@ public class TinkersCentrifuge{
     );
     //熔融月季铁注册
     public static FluidType.Properties MOLTEN_FLUID_TYPE_PROPERTIES = FluidType.Properties.create()
-            .density(2000)
-            .viscosity(10000)
-            .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_LAVA)
-            .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_LAVA);
+        .density(2000)
+        .viscosity(10000)
+        .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_LAVA)
+        .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_LAVA);
+
+    public static RegistryObject<FluidType> MOLTEN_ROSA_IRON_TYPE = FLUID_TYPES.register(
+        "molten",
+        () -> new MoltenFluidType("molten_rosa_iron", TinkersCentrifuge.MOLTEN_FLUID_TYPE_PROPERTIES.temperature(993))
+    );
         
     public static final ForgeFlowingFluid.Properties MOLTEN_ROSA_IRON_PROPERTIES = new ForgeFlowingFluid.Properties(
-        () -> new FluidType(MOLTEN_FLUID_TYPE_PROPERTIES.temperature(993)),
+        () -> TinkersCentrifuge.MOLTEN_ROSA_IRON_TYPE.get(),
         () -> TinkersCentrifuge.MOLTEN_ROSA_IRON.get(),
         () -> TinkersCentrifuge.MOLTEN_ROSA_IRON_FLOWING.get()
-    ).block(() -> TinkersCentrifuge.MOLTEN_ROSA_IRON_FLUID.get())
+    ).block(() -> TinkersCentrifuge.MOLTEN_ROSA_IRON_BLOCK.get())
     .bucket(() -> TinkersCentrifuge.MOLTEN_ROSA_IRON_BUCKET.get())
     .slopeFindDistance(3).explosionResistance(100F);
     private static final RegistryObject<FlowingFluid> MOLTEN_ROSA_IRON = FLUIDS.register(
@@ -102,9 +108,9 @@ public class TinkersCentrifuge{
         "molten_rosa_iron_bucket",
         () -> new BucketItem(MOLTEN_ROSA_IRON, new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1))
     );
-    public static final RegistryObject<LiquidBlock> MOLTEN_ROSA_IRON_FLUID = BLOCKS.register(
-        "molten_rosa_iron_fluid",
-        () -> new LiquidBlock(MOLTEN_ROSA_IRON, BlockBehaviour.Properties.of())
+    public static final RegistryObject<LiquidBlock> MOLTEN_ROSA_IRON_BLOCK = BLOCKS.register(
+        "molten_rosa_iron",
+        () -> new LiquidBlock(MOLTEN_ROSA_IRON, BlockBehaviour.Properties.of().noLootTable())
     );
 
     public TinkersCentrifuge(FMLJavaModLoadingContext context){
@@ -113,6 +119,7 @@ public class TinkersCentrifuge{
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         FLUIDS.register(modEventBus);
+        FLUID_TYPES.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
         MinecraftForge.EVENT_BUS.register(this);

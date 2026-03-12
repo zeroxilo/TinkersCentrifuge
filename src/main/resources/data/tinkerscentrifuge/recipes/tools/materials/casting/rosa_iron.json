@@ -1,0 +1,9 @@
+{
+  "type": "tconstruct:material_fluid",
+  "fluid": {
+    "amount": 90,
+    "tag": "forge:molten_rosa_iron"
+  },
+  "output": "tinkerscentrifuge:rosa_iron",
+  "temperature": 720
+}

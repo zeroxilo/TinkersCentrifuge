@@ -1,0 +1,9 @@
+{
+  "type": "tconstruct:material_melting",
+  "input": "tinkerscentrifuge:rosa_iron",
+  "result": {
+    "amount": 90,
+    "tag": "forge:molten_rosa_iron"
+  },
+  "temperature": 720
+}

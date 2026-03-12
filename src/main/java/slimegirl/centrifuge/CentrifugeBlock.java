@@ -71,7 +71,7 @@ public class CentrifugeBlock extends InventoryBlock implements ITankBlock, Entit
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> check) {
-        return CentrifugeBlockEntity.getTicker(pLevel, check, null);
+        return CentrifugeBlockEntity.getTicker(pLevel, check, TinkersCentrifuge.CENTRIFUGE_ENTITY.get());
         //return CentrifugeBlockEntity.getTicker(pLevel, check, TinkerSmeltery.basin.get());
         //return CastingBlockEntity.getTicker(pLevel, check, TinkerSmeltery.basin.get());
     }

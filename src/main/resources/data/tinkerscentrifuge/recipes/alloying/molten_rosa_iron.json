@@ -1,8 +1,8 @@
 {
 	"type": "tconstruct:alloy",
 	"inputs": [
-		{ "name": "tconstruct:molten_iron","amount": 90 },
-		{ "name": "tconstruct:molten_copper","amount": 90 }
+		{ "fluid": "tconstruct:molten_iron","amount": 90 },
+		{ "fluid": "tconstruct:molten_copper","amount": 90 }
 	],
 	"result": {
 		"fluid": "tinkerscentrifuge:molten_rosa_iron",

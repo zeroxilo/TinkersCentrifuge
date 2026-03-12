@@ -1,0 +1,9 @@
+{
+  "type": "tconstruct:material",
+  "ingredient": {
+    "tag": "forge:nuggets/rosa_iron"
+  },
+  "material": "tinkerscentrifuge:rosa_iron",
+  "needed": 9,
+  "value": 1
+}

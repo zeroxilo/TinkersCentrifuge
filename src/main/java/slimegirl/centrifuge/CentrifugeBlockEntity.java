@@ -6,17 +6,12 @@ import javax.annotation.Nonnull;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
@@ -25,7 +20,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -33,8 +27,6 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.fluid.transfer.FluidContainerTransferManager;
@@ -42,19 +34,12 @@ import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.common.Sounds;
-import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe;
 import slimeknights.tconstruct.library.utils.NBTTags;
 import slimeknights.tconstruct.shared.block.entity.TableBlockEntity;
-import slimeknights.tconstruct.smeltery.TinkerSmeltery;
-import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity;
-import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity.ITankBlock;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
-import slimeknights.tconstruct.smeltery.item.TankItem;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBlockEntity, WorldlyContainer {
@@ -128,25 +113,30 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     private void serverTick(Level level, BlockPos pos) {
         if (currentRecipe == null) {
             FluidStack currentFluid = tank.getFluid();
+            //TinkersCentrifuge.LOGGER.info("[AntiAlloy]Check Recipe of "+currentFluid.getDisplayName().getString());
             if (!currentFluid.isEmpty()) {
                 AlloyRecipe recipe = alloyModule.getRecipe(currentFluid);
                 if (recipe != null) {
+                    TinkersCentrifuge.LOGGER.info("[AntiAlloy]Found Recipe of "+currentFluid.getDisplayName().getString());
                     currentRecipe = recipe;
-                    timer = 20;
+                    timer = 19;//20帧
                 }
             }
-            return;
-        }
-        if(timer > 0){
+        }else if(timer > 0){
             timer--;
             if (timer == 0) {
                 //处理完成，输出合金原材料
                 FluidStack alloy = currentRecipe.getOutput();
                 tank.drain(alloy, IFluidHandler.FluidAction.EXECUTE);
-                List<List<FluidStack>> outputss = currentRecipe.getDisplayInputs(); //每一项的内部列表都是可选液体，暂时不管。
+                List<Ingredient> outputss = currentRecipe.getIngredients();
+                for(Ingredient output : outputss){
+                    TinkersCentrifuge.LOGGER.info("[AntiAlloy]Try to output "+output.toString());
+                }
+                /*
                 FluidStack output = null;
                 for(List<FluidStack> outputs : outputss){
                     output = outputs.get(0);
+                    LOGGER.info("[AntiAlloy]Try to output "+output.getDisplayName().getString());
                     if(output.isEmpty()){
                         continue;
                     }
@@ -156,7 +146,7 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
                             break;
                         }
                     }
-                }
+                }*/
                 currentRecipe = null;
             }
         }
@@ -164,6 +154,7 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
         for(FluidTankAnimated outputTank : outputTanks){
             if(!outputTank.isEmpty()){
                 FluidStack output = outputTank.getFluid();
+                TinkersCentrifuge.LOGGER.info("[AntiAlloy]Try to transfer "+output.getDisplayName().getString());
                 BlockPos targetPos = pos.below();
                 if(level.getBlockEntity(targetPos) instanceof IFluidHandler targetHandler){
                     int filled = targetHandler.fill(output, IFluidHandler.FluidAction.EXECUTE);
