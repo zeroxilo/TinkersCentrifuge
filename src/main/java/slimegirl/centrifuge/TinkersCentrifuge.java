@@ -84,8 +84,8 @@ public class TinkersCentrifuge{
         .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_LAVA)
         .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_LAVA);
 
-    public static RegistryObject<FluidType> MOLTEN_ROSA_IRON_TYPE = FLUID_TYPES.register(
-        "molten",
+    public static final RegistryObject<FluidType> MOLTEN_ROSA_IRON_TYPE = FLUID_TYPES.register(
+        "molten_rosa_iron",
         () -> new MoltenFluidType("molten_rosa_iron", TinkersCentrifuge.MOLTEN_FLUID_TYPE_PROPERTIES.temperature(993))
     );
         

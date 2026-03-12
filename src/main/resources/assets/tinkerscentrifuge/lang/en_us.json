@@ -8,5 +8,9 @@
 	"fluid_type.tinkerscentrifuge.molten_rosa_iron": "Molten Rosa Iron",
 	"item.tinkerscentrifuge.molten_rosa_iron_bucket": "Molten Rosa Iron Bucket",
 	"material.tinkerscentrifuge.rosa_iron": "Rosa Iron",
-	"material.tinkerscentrifuge.rosa_iron.flavor": "Its existence cautions you — never let copper in your Smeltry."
+	"material.tinkerscentrifuge.rosa_iron.flavor": "Its existence cautions you — never let copper in your Smeltry.",
+	
+	"modifier.tinkerscentrifuge.amulet": "Amulet",
+	"modifier.tinkerscentrifuge.amulet.flavor": "Glamorous!",
+	"modifier.tinkerscentrifuge.amulet.description": "Rosa iron goes gently with an extra defense slot!"
 }

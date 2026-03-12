@@ -27,6 +27,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import slimegirl.centrifuge.AntiAlloyModule.AntiAlloyRecipe;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.fluid.transfer.FluidContainerTransferManager;
@@ -51,8 +52,8 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
 
     private static final Component NAME = TConstruct.makeTranslation("gui", "casting");
 
-    protected final AntiAlloyModule alloyModule;
-    protected AlloyRecipe currentRecipe;
+    protected final AntiAlloyModule antiAlloyModule;
+    protected AntiAlloyRecipe currentRecipe;
     protected int timer = 0;
     protected final FluidTankAnimated tank;
     protected final List<FluidTankAnimated> outputTanks;
@@ -78,7 +79,7 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     @SuppressWarnings("WeakerAccess")
     protected CentrifugeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state, NAME, 2, 1);
-        alloyModule = new AntiAlloyModule();
+        antiAlloyModule = new AntiAlloyModule(this.getLevel());
         tank = new FluidTankAnimated(DEFAULT_CAPACITY, this);
         outputTanks = List.of(new FluidTankAnimated(DEFAULT_CAPACITY, this),
             new FluidTankAnimated(DEFAULT_CAPACITY, this),
@@ -113,9 +114,9 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     private void serverTick(Level level, BlockPos pos) {
         if (currentRecipe == null) {
             FluidStack currentFluid = tank.getFluid();
-            //TinkersCentrifuge.LOGGER.info("[AntiAlloy]Check Recipe of "+currentFluid.getDisplayName().getString());
+            antiAlloyModule.initRecipes(this.level);
             if (!currentFluid.isEmpty()) {
-                AlloyRecipe recipe = alloyModule.getRecipe(currentFluid);
+                AntiAlloyRecipe recipe = antiAlloyModule.getRecipe(currentFluid);
                 if (recipe != null) {
                     TinkersCentrifuge.LOGGER.info("[AntiAlloy]Found Recipe of "+currentFluid.getDisplayName().getString());
                     currentRecipe = recipe;
@@ -125,28 +126,23 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
         }else if(timer > 0){
             timer--;
             if (timer == 0) {
-                //处理完成，输出合金原材料
-                FluidStack alloy = currentRecipe.getOutput();
+                //处理完成，汲取合金
+                FluidStack alloy = currentRecipe.getInput();
                 tank.drain(alloy, IFluidHandler.FluidAction.EXECUTE);
-                List<Ingredient> outputss = currentRecipe.getIngredients();
-                for(Ingredient output : outputss){
-                    TinkersCentrifuge.LOGGER.info("[AntiAlloy]Try to output "+output.toString());
-                }
-                /*
-                FluidStack output = null;
-                for(List<FluidStack> outputs : outputss){
-                    output = outputs.get(0);
-                    LOGGER.info("[AntiAlloy]Try to output "+output.getDisplayName().getString());
+                //返还合成材料
+                List<FluidStack> outputs = currentRecipe.getOutputs();
+                for(FluidStack output : outputs){
                     if(output.isEmpty()){
                         continue;
                     }
+                    TinkersCentrifuge.LOGGER.info("[AntiAlloy]Try to output "+output.getDisplayName().getString());
                     for(FluidTankAnimated outputTank : outputTanks){
                         if(outputTank.fill(output, IFluidHandler.FluidAction.SIMULATE) == output.getAmount()){
                             outputTank.fill(output, IFluidHandler.FluidAction.EXECUTE);
                             break;
                         }
                     }
-                }*/
+                }
                 currentRecipe = null;
             }
         }
@@ -220,18 +216,12 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
             }
         } else {
             tank.readFromNBT(nbt);
-            if(!nbt.contains("outputs") || nbt.getCompound("outputs").isEmpty()){
-                for (FluidTankAnimated outputTank : outputTanks) {
-                    outputTank.setFluid(FluidStack.EMPTY);
-                }
-            }else{
-                for(int i = 0; i < outputTanks.size(); i++){
-                    if(nbt.getCompound("outputs").contains("output" + i) && !nbt.getCompound("outputs").getCompound("output" + i).isEmpty()){
-                        CompoundTag outputTag = nbt.getCompound("outputs").getCompound("output" + i);
-                        outputTanks.get(i).readFromNBT(outputTag);
-                    }else{
-                        outputTanks.get(i).setFluid(FluidStack.EMPTY);
-                    }
+            for(int i = 0; i < outputTanks.size(); i++){
+                if(nbt.contains("output_tank" + i) && !nbt.getCompound("output_tank" + i).isEmpty()){
+                    CompoundTag outputTag = nbt.getCompound("output_tank" + i);
+                    outputTanks.get(i).readFromNBT(outputTag);
+                }else{
+                    outputTanks.get(i).setFluid(FluidStack.EMPTY);
                 }
             }
             //CentrifugeBlockEntity.updateLight(this, tank);
@@ -282,14 +272,9 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
         if (!tank.isEmpty()) {
             tag.put(NBTTags.TANK, tank.writeToNBT(new CompoundTag()));
         }
-        boolean hasOutput = false;
         for(FluidTankAnimated outputTank : outputTanks){
             if(!outputTank.isEmpty()){
-                if(!hasOutput){
-                    tag.put(NBTTags.TANK + ".outputs", new CompoundTag());
-                }
-                hasOutput = true;
-                tag.put(NBTTags.TANK + ".outputs.output" + outputTanks.indexOf(outputTank),outputTank.writeToNBT(new CompoundTag()));
+                tag.put("output_" + NBTTags.TANK + outputTanks.indexOf(outputTank),outputTank.writeToNBT(new CompoundTag()));
                 break;
             }
         }

@@ -8,5 +8,13 @@
 	"fluid_type.tinkerscentrifuge.molten_rosa_iron": "熔融月季铁",
 	"item.tinkerscentrifuge.molten_rosa_iron_bucket": "熔融月季铁桶",
 	"material.tinkerscentrifuge.rosa_iron": "月季铁",
-	"material.tinkerscentrifuge.rosa_iron.flavor": "它的存在仿佛就是为了提醒你——永远不要让铜待在你的炉子里。"
+	"material.tinkerscentrifuge.rosa_iron.flavor": "它的存在仿佛就是为了提醒你——永远不要让铜待在你的炉子里。",
+
+    "modifier.tinkerscentrifuge.amulet": "护符",
+    "modifier.tinkerscentrifuge.amulet.flavor": "铁闪闪！",
+    "modifier.tinkerscentrifuge.amulet.description": "绅士的月季铁能提供一个额外的防御槽！",
+
+	"__rose_gold_translation__": "修正玫瑰金的翻译问题，毕竟要对仗",
+	"modifier.tconstruct.enhanced.flavor": "金灿灿！",
+	"modifier.tconstruct.enhanced.description": "伟大的玫瑰金能为你提供一个额外的能力槽！"
 }

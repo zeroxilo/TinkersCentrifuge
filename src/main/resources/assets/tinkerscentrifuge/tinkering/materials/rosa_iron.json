@@ -5,6 +5,18 @@
 	"color": "F5C04E",
 	"luminosity": 4,
 	"generator": {
+		"transformer": {
+		  "type": "tconstruct:grey_to_sprite",
+		  "palette": [
+			{"color": "FFCF5B18","grey": 0},
+			{"color": "FFE17025","grey": 63},
+			{"color": "FFEEA934","grey": 102},
+			{"color": "FFEE953B","grey": 140},
+			{"color": "FFF5C04E","grey": 178},
+			{"color": "FFFAE993","grey": 216},
+			{"color": "FFFFFFFF","grey": 255}
+		  ]
+		},
 		"supported_stats": [
 			"tconstruct:head",
 			"tconstruct:handle",
