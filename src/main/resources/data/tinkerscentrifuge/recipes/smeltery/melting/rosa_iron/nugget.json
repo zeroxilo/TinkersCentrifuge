@@ -1,0 +1,12 @@
+{
+  "type": "tconstruct:melting",
+  "ingredient": {
+    "tag": "forge:nuggets/rosa_iron"
+  },
+  "result": {
+    "amount": 10,
+    "tag": "forge:molten_rosa_iron"
+  },
+  "temperature": 720,
+  "time": 17
+}

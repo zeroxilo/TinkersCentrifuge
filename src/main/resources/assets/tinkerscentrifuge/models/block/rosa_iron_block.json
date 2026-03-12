@@ -1,0 +1,6 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "all": "tinkerscentrifuge:block/rosa_iron_block"
+    }
+}

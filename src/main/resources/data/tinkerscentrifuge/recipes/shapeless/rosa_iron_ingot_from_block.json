@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "tinkerscentrifuge:rosa_iron_ingot",
+  "ingredients": [
+    {
+      "item": "tinkerscentrifuge:rosa_iron_block"
+    }
+  ],
+  "result": {
+    "count": 9,
+    "item": "tinkerscentrifuge:rosa_iron_ingot"
+  }
+}

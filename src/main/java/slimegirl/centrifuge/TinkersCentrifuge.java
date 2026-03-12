@@ -1,35 +1,35 @@
 package slimegirl.centrifuge;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.food.FoodProperties;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.SoundActions;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fluids.FluidType;
+import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import slimegirl.centrifuge.CentrifugeBlock;
-import slimeknights.mantle.item.BlockTooltipItem;
-import slimeknights.mantle.registration.deferred.BlockEntityTypeDeferredRegister;
 
 import org.slf4j.Logger;
 
@@ -38,37 +38,83 @@ import org.slf4j.Logger;
 public class TinkersCentrifuge{
     public static final String MODID = "tinkerscentrifuge";
     private static final Logger LOGGER = LogUtils.getLogger();
-    public static final BlockEntityTypeDeferredRegister BLOCK_ENTITIES = new BlockEntityTypeDeferredRegister(MODID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+    public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(ForgeRegistries.FLUIDS, MODID);
     
     protected static final Item.Properties ITEM_PROPS = new Item.Properties();
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     
-    public static final RegistryObject<Block> CENTRIFUGE_BLOCK = BLOCKS.register(
+    //离心机注册
+    public static final RegistryObject<CentrifugeBlock> CENTRIFUGE_BLOCK = BLOCKS.register(
         "centrifuge",
-        () -> new CentrifugeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE),false)
+        () -> new CentrifugeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK))
     );
-    public static final RegistryObject<Item> CENTRIFUGE_BLOCK_ITEM = ITEMS.register(
+    public static final RegistryObject<BlockItem> CENTRIFUGE_BLOCK_ITEM = ITEMS.register(
         "centrifuge",
         () -> new BlockItem(CENTRIFUGE_BLOCK.get(), new Item.Properties())
     );
-    public static final RegistryObject<BlockEntityType<CentrifugeBlockEntity>> CENTRIFUGE_ENTITY = BLOCK_ENTITIES.register("centrifuge", CentrifugeBlockEntity::new, set -> set.add(CENTRIFUGE_BLOCK.get()));
-
-    /*public static final RegistryObject<CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
-            .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> CENTRIFUGE_BLOCK.get().getDefaultInstance())
-            .displayItems((parameters, output) -> {
-                output.accept(CENTRIFUGE_BLOCK.get());
-            }).build());*/
+    public static final RegistryObject<BlockEntityType<CentrifugeBlockEntity>> CENTRIFUGE_ENTITY = BLOCK_ENTITIES.register(
+        "centrifuge_entity", () -> BlockEntityType.Builder.of(CentrifugeBlockEntity::new, CENTRIFUGE_BLOCK.get()).build(null)
+    );
+    //月季铁注册
+    public static final RegistryObject<Block> ROSA_IRON_BLOCK = BLOCKS.register(
+        "rosa_iron_block",
+        () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(5.0f, 6.0f))
+    );
+    public static final RegistryObject<BlockItem> ROSA_IRON_BLOCK_ITEM = ITEMS.register(
+        "rosa_iron_block",
+        () -> new BlockItem(ROSA_IRON_BLOCK.get(), new Item.Properties())
+    );
+    public static final RegistryObject<Item> ROSA_IRON_INGOT = ITEMS.register(
+        "rosa_iron_ingot",
+        () -> new Item(new Item.Properties())
+    );
+    public static final RegistryObject<Item> ROSA_IRON_NUGGET = ITEMS.register(
+        "rosa_iron_nugget",
+        () -> new Item(new Item.Properties())
+    );
+    //熔融月季铁注册
+    public static FluidType.Properties MOLTEN_FLUID_TYPE_PROPERTIES = FluidType.Properties.create()
+            .density(2000)
+            .viscosity(10000)
+            .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_LAVA)
+            .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_LAVA);
+        
+    public static final ForgeFlowingFluid.Properties MOLTEN_ROSA_IRON_PROPERTIES = new ForgeFlowingFluid.Properties(
+        () -> new FluidType(MOLTEN_FLUID_TYPE_PROPERTIES.temperature(993)),
+        () -> TinkersCentrifuge.MOLTEN_ROSA_IRON.get(),
+        () -> TinkersCentrifuge.MOLTEN_ROSA_IRON_FLOWING.get()
+    ).block(() -> TinkersCentrifuge.MOLTEN_ROSA_IRON_FLUID.get())
+    .bucket(() -> TinkersCentrifuge.MOLTEN_ROSA_IRON_BUCKET.get())
+    .slopeFindDistance(3).explosionResistance(100F);
+    private static final RegistryObject<FlowingFluid> MOLTEN_ROSA_IRON = FLUIDS.register(
+        "molten_rosa_iron", 
+        () -> new ForgeFlowingFluid.Source(MOLTEN_ROSA_IRON_PROPERTIES)
+    );
+    private static final RegistryObject<FlowingFluid> MOLTEN_ROSA_IRON_FLOWING = FLUIDS.register(
+        "molten_rosa_iron_flowing", 
+        () -> new ForgeFlowingFluid.Flowing(MOLTEN_ROSA_IRON_PROPERTIES)
+    );
+    public static final RegistryObject<BucketItem> MOLTEN_ROSA_IRON_BUCKET = ITEMS.register(
+        "molten_rosa_iron_bucket",
+        () -> new BucketItem(MOLTEN_ROSA_IRON, new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1))
+    );
+    public static final RegistryObject<LiquidBlock> MOLTEN_ROSA_IRON_FLUID = BLOCKS.register(
+        "molten_rosa_iron_fluid",
+        () -> new LiquidBlock(MOLTEN_ROSA_IRON, BlockBehaviour.Properties.of())
+    );
 
     public TinkersCentrifuge(FMLJavaModLoadingContext context){
         IEventBus modEventBus = context.getModEventBus();
         modEventBus.addListener(this::commonSetup);
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
+        FLUIDS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
+        BLOCK_ENTITIES.register(modEventBus);
         MinecraftForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::addCreative);
         //context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);

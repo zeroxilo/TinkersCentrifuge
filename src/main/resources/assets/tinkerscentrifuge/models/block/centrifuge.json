@@ -1,8 +1,7 @@
 {
-  "parent": "tconstruct:block/template/basin",
+  "parent": "tconstruct:block/template/tank_knob",
   "textures": {
-    "top": "tinkerscentrifuge:block/centrifuge_top",
-    "side": "tinkerscentrifuge:block/centrifuge_side",
-    "bottom": "tinkerscentrifuge:block/centrifuge_bottom"
+    "top":  "tinkerscentrifuge:block/centrifuge_top",
+    "side": "tinkerscentrifuge:block/centrifuge_side"
   }
 }

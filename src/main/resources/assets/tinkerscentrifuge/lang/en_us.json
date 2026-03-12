@@ -1,3 +1,6 @@
 {
-    "block.tinkerscentrifuge.centrifuge" : "Alloy Centrifuge"
+    "block.tinkerscentrifuge.centrifuge" : "Alloy Centrifuge",
+    "item.tinkerscentrifuge.rosa_iron_ingot" : "Rosa Iron Ingot",
+    "item.tinkerscentrifuge.rosa_iron_nugget" : "Rosa Iron Nugget",
+    "block.tinkerscentrifuge.rosa_iron_block" : "Rosa Iron Block"
 }

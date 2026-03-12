@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "tinkerscentrifuge:rosa_iron_block",
+  "key": {
+    "#": {
+      "tag": "forge:ingots/rosa_iron"
+    },
+    "*": {
+      "item": "tinkerscentrifuge:rosa_iron_ingot"
+    }
+  },
+  "pattern": [
+    "###",
+    "#*#",
+    "###"
+  ],
+  "result": {
+    "item": "tinkerscentrifuge:rosa_iron_block"
+  },
+  "show_notification": true
+}

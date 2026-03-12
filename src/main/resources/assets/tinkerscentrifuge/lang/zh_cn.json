@@ -1,3 +1,10 @@
 {
-    "block.tinkerscentrifuge.centrifuge" : "合金离心机"
+    "block.tinkerscentrifuge.centrifuge" : "合金离心机",
+    "item.tinkerscentrifuge.rosa_iron_ingot" : "月季铁锭",
+    "item.tinkerscentrifuge.rosa_iron_nugget" : "月季铁粒",
+    "block.tinkerscentrifuge.rosa_iron_block" : "月季铁块",
+	"fluid.tinkereverything.molten_rosa_iron": "熔融月季铁",
+	"item.tinkereverything.molten_rosa_iron_bucket": "熔融月季铁桶",
+	"material.tinkereverything.rosa_iron": "月季铁",
+	"material.tinkereverything.rosa_iron.flavor": "它的存在仿佛就是为了提醒你——永远不要让铜待在你的熔炉。"
 }

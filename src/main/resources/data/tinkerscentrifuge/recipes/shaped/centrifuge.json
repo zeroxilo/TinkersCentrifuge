@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "B": {"item": "tconstruct:seared_basin"},
-    "r": {"item": "tconstruct:rose_gold_ingot"}
+    "s": {"item": "tconstruct:seared_brick"},
+    "r": {"item": "tinkerscentrifuge:rosa_iron_ingot"}
   },
   "pattern": [
     "r r",
     "r r",
-    "rBr"
+    "sss"
   ],
   "result": {
     "count": 1,
