@@ -35,6 +35,7 @@ import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe;
 import slimeknights.tconstruct.library.utils.NBTTags;
@@ -112,24 +113,31 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
 
     /* 服务器每帧事件 - 核心处理逻辑 */
     private void serverTick(Level level, BlockPos pos) {
+        boolean invalidAlloy = false;
         if (currentRecipe == null) {
             FluidStack currentFluid = tank.getFluid();
-            antiAlloyModule.initRecipes(this.level);
-            if (!currentFluid.isEmpty()) {
-                AntiAlloyRecipe recipe = antiAlloyModule.getRecipe(currentFluid);
-                if (recipe != null) {
-                    TinkersCentrifuge.LOGGER.info("[AntiAlloy]Found Recipe of "+currentFluid.getDisplayName().getString());
-                    currentRecipe = recipe;
-                    timer = 19;//20帧
+            antiAlloyModule.setLevel(this.level);
+            if (!currentFluid.isEmpty()){
+                if (antiAlloyModule.hasRecipe(currentFluid)) {
+                    AntiAlloyRecipe recipe = antiAlloyModule.getRecipe(currentFluid);
+                    if (recipe != null) {
+                        currentRecipe = recipe;
+                        timer = 10;//10帧
+                    } else {
+                        invalidAlloy = true;
+                    }
+                }else{
+                    invalidAlloy = true;
                 }
             }
-        }else if(timer > 0){
+        }
+        if(timer > 0){
             timer--;
             if (timer == 0) {
                 //处理完成，汲取合金
                 FluidStack alloy = currentRecipe.getInput();
                 tank.drain(alloy, IFluidHandler.FluidAction.EXECUTE);
-                //返还合成材料
+                //返还原料
                 List<FluidStack> outputs = currentRecipe.getOutputs();
                 for(FluidStack output : outputs){
                     if(output.isEmpty()){
@@ -147,15 +155,17 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
             }
         }
         //尝试将输出槽的液体依次输出到下方的容器中
-        for(FluidTankAnimated outputTank : outputTanks){
-            if(!outputTank.isEmpty()){
-                FluidStack output = outputTank.getFluid();
-                TinkersCentrifuge.LOGGER.info("[AntiAlloy]Try to transfer "+output.getDisplayName().getString());
-                BlockPos targetPos = pos.below();
-                if(level.getBlockEntity(targetPos) instanceof IFluidHandler targetHandler){
-                    int filled = targetHandler.fill(output, IFluidHandler.FluidAction.EXECUTE);
+        IFluidHandler transferTarget = findFluidHandler(Direction.DOWN).orElse(null);
+        if (transferTarget != null){
+            for(FluidTankAnimated outputTank : outputTanks){
+                if(!outputTank.isEmpty()){
+                    FluidStack output = outputTank.getFluid();
+                    int filled = transferTarget.fill(output, IFluidHandler.FluidAction.EXECUTE);
                     if(filled > 0){
                         outputTank.drain(filled, IFluidHandler.FluidAction.EXECUTE);
+                    }
+                    if (!outputTank.isEmpty()){
+                        break;
                     }
                 }
             }
@@ -207,6 +217,18 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
         return super.getCapability(capability, facing);
     }
 
+    private LazyOptional<IFluidHandler> findFluidHandler(Direction side) {
+        assert level != null;
+        BlockEntity te = level.getBlockEntity(worldPosition.relative(side));
+        if (te != null) {
+            LazyOptional<IFluidHandler> handler = te.getCapability(ForgeCapabilities.FLUID_HANDLER, side.getOpposite());
+            if (handler.isPresent()) {
+                return handler;
+            }
+        }
+        return LazyOptional.empty();
+    }
+
     //从nbt数据中获取流体信息并更新
     public void updateTank(CompoundTag nbt) {
         if (nbt.isEmpty()) {
@@ -217,8 +239,8 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
         } else {
             tank.readFromNBT(nbt);
             for(int i = 0; i < outputTanks.size(); i++){
-                if(nbt.contains("output_tank" + i) && !nbt.getCompound("output_tank" + i).isEmpty()){
-                    CompoundTag outputTag = nbt.getCompound("output_tank" + i);
+                if(nbt.contains("outputTank" + i) && !nbt.getCompound("outputTank" + i).isEmpty()){
+                    CompoundTag outputTag = nbt.getCompound("outputTank" + i);
                     outputTanks.get(i).readFromNBT(outputTag);
                 }else{
                     outputTanks.get(i).setFluid(FluidStack.EMPTY);
@@ -227,6 +249,23 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
             //CentrifugeBlockEntity.updateLight(this, tank);
         }
     }
+
+    //保存同步数据，客户端加载时会调用load方法
+    @Override
+    public void saveSynced(CompoundTag tag) {
+        super.saveSynced(tag);
+        // want tank on the client on world load
+        if (!tank.isEmpty()) {
+            tag.put("tank", tank.writeToNBT(new CompoundTag()));
+        }
+        for(int i = 0; i < outputTanks.size(); i++){
+            if(!outputTanks.get(i).isEmpty()){
+                tag.put("outputTank" + i,outputTanks.get(i).writeToNBT(new CompoundTag()));
+                break;
+            }
+        }
+    }
+
     @Override
     public void invalidateCaps() {
         super.invalidateCaps();
@@ -237,8 +276,8 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     @Override
     public ModelData getModelData() {
         return ModelData.builder()
-        //.with(ModelProperties.FLUID_STACK, tank.getFluid())
-        //.with(ModelProperties.TANK_CAPACITY, tank.getCapacity())
+        .with(ModelProperties.FLUID_STACK, tank.getFluid())
+        .with(ModelProperties.TANK_CAPACITY, tank.getCapacity())
         .build();
     }
 
@@ -253,7 +292,7 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
 
     @Override
     public void load(CompoundTag tag) {
-        updateTank(tag.getCompound(NBTTags.TANK));
+        updateTank(tag.getCompound("tank"));
         lastRedstone = tag.getBoolean(TAG_REDSTONE);
         super.load(tag);
     }
@@ -262,22 +301,6 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     public void saveAdditional(CompoundTag tags) {
         super.saveAdditional(tags);
         tags.putBoolean(TAG_REDSTONE, lastRedstone);
-    }
-
-    //保存同步数据，客户端加载时会调用load方法
-    @Override
-    public void saveSynced(CompoundTag tag) {
-        super.saveSynced(tag);
-        // want tank on the client on world load
-        if (!tank.isEmpty()) {
-            tag.put(NBTTags.TANK, tank.writeToNBT(new CompoundTag()));
-        }
-        for(FluidTankAnimated outputTank : outputTanks){
-            if(!outputTank.isEmpty()){
-                tag.put("output_" + NBTTags.TANK + outputTanks.indexOf(outputTank),outputTank.writeToNBT(new CompoundTag()));
-                break;
-            }
-        }
     }
 
     @Nullable

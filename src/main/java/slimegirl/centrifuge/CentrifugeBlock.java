@@ -43,13 +43,14 @@ import javax.annotation.Nullable;
 
 public class CentrifugeBlock extends InventoryBlock implements ITankBlock, EntityBlock {
 
-    private static final VoxelShape SHAPE = Shapes.join(
+    private static final VoxelShape SHAPE = Shapes.block();
+    /*Shapes.join(
         Shapes.block(),
         Shapes.or(
             Block.box(0.0D, 0.0D, 5.0D, 16.0D, 2.0D, 11.0D),
             Block.box(5.0D, 0.0D, 0.0D, 11.0D, 2.0D, 16.0D),
             Block.box(2.0D, 4.0D, 2.0D, 14.0D, 16.0D, 14.0D)),
-        BooleanOp.ONLY_FIRST);
+        BooleanOp.ONLY_FIRST);*/
 
     public CentrifugeBlock(Properties builder) {
         super(builder);

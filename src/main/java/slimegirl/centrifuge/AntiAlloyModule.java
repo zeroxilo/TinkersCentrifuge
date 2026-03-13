@@ -49,7 +49,7 @@ public class AntiAlloyModule {
 
         public AntiAlloyRecipe(AlloyRecipe alloyRecipe) {
             this.alloyRecipe = alloyRecipe;
-            this.input = alloyRecipe.getOutput();
+            this.input = new FluidStack (alloyRecipe.getOutput().getFluid(), alloyRecipe.getOutput().getAmount() / 10);
             this.input.setAmount(alloyRecipe.getOutput().getAmount() / 10);
             this.outputs = new ArrayList<>();
             //尝试根据原有配方构造输入输出
@@ -73,22 +73,23 @@ public class AntiAlloyModule {
                         TinkersCentrifuge.LOGGER.error("[AntiAlloy] Failed to parse JSON for recipe: " + alloyRecipe.getId());
                         return;
                     }
-                    List<FluidIngredient> fluids = JsonHelper.parseList(json, "inputs", FluidIngredient::deserialize);
+                    
                     //构建输出流体
-                    if (!fluids.isEmpty()) {
-                        for(FluidIngredient fluid : fluids){
-                            if (fluid.getFluids().isEmpty()) {
-                                continue;
-                            }
-                            FluidStack firstOne = Objects.requireNonNull(fluid.getFluids().get(0));
-                            if(firstOne != null){
-                                this.outputs.add(firstOne);
-                            }
+                    String recipe_type = GsonHelper.getAsString(json, "type", "unknown");
+                    if(recipe_type.equals("tconstruct:alloy")){ //普通合金配方
+                        fitToOutputs(JsonHelper.parseList(json, "inputs", FluidIngredient::deserialize));
+                        TinkersCentrifuge.LOGGER.info("[AntiAlloy] Processing alloy recipe: " + alloyRecipe.getId());
+                    } else if(recipe_type.equals("forge:conditional")) { //下界合金小巧思配方，目前应该没有别的用
+                        if(alloyRecipe.getId().toString().equals("tconstruct:smeltery/alloys/molten_netherite")){
+                            fitToOutputs(JsonHelper.parseList(json.get("recipes").getAsJsonArray().get(1).getAsJsonObject().get("recipe").getAsJsonObject(), "inputs", FluidIngredient::deserialize));
+                            TinkersCentrifuge.LOGGER.info("[AntiAlloy] Processing alloy recipe: " + alloyRecipe.getId());
+                        }else{
+                            TinkersCentrifuge.LOGGER.info("[AntiAlloy] Unknown Conditional Recipe: " + alloyRecipe.getId());
                         }
-                        TinkersCentrifuge.LOGGER.info("[AntiAlloy] Loaded recipe: " + alloyRecipe.getId() + " with inputs: " + fluids);
-                    } else {
-                        TinkersCentrifuge.LOGGER.info("[AntiAlloy] Alloy recipe has an empty input: " + alloyRecipe.getId());
+                    }else{
+                        TinkersCentrifuge.LOGGER.warn("[AntiAlloy] Unsupported Type Recipe: " + alloyRecipe.getId());
                     }
+                    /* */
                 } catch (Exception e) {
                     TinkersCentrifuge.LOGGER.error("[AntiAlloy] Failed to load recipe from " + alloyRecipe.getId(), e);
                 }
@@ -96,10 +97,26 @@ public class AntiAlloyModule {
                 TinkersCentrifuge.LOGGER.warn("[AntiAlloy] Resource manager is not available. Cannot load recipe: " + alloyRecipe.getId());
             }
         }
+        //将配方条件转化为流体列表
+        public void fitToOutputs(List<FluidIngredient> fluid_ingredients){
+            if (!fluid_ingredients.isEmpty()) {
+                for(FluidIngredient ingredient : fluid_ingredients){
+                    if (ingredient.getFluids().isEmpty()) {
+                        continue;
+                    }
+                    FluidStack firstOne = Objects.requireNonNull(ingredient.getFluids().get(0));
+                    if(firstOne != null){
+                        this.outputs.add(new FluidStack(firstOne.getFluid(), firstOne.getAmount() / 10));
+                    }
+                }
+            }
+        }
     
+        //获取输入
         public FluidStack getInput() {
             return input;
         }
+        //获取输出
         public List<FluidStack> getOutputs() {
             return outputs;
         }
@@ -110,20 +127,18 @@ public class AntiAlloyModule {
     private List<Fluid> allAlloys;
 
     //获取所有合金配方
-    public void initRecipes(Level level) {
-        if(this.level == null){
-            this.level = level;
-        }
-        initRecipes();
-    }
-    //获取所有合金配方
-    public void initRecipes() {
+    public void setLevel(Level level) {
+        this.level = level;
         if(level != null){
             this.server = level.getServer();
+            //资源管理器是静态类，但必须得靠这个方法才能在服务端环境里正确获取
             if (server != null && resourceManager == null) {
                 resourceManager = server.getResourceManager();
             }
         }
+    }
+    //获取所有合金配方
+    public void initRecipes() {
         if (level != null && resourceManager != null) {
             // 从配方管理器那边获取所有合金配方
             RecipeManager recipeManager = level.getRecipeManager();
@@ -141,6 +156,7 @@ public class AntiAlloyModule {
                     allAlloys.add(recipe.input.getFluid());
                 }
             }
+            isLoaded = true;
         }
     }
 
@@ -152,9 +168,14 @@ public class AntiAlloyModule {
         }
         return false;
     }
+    
+    public boolean hasRecipe(FluidStack alloy) {
+        return hasRecipe(alloy.getFluid());
+    }
 
     //返回首个符合的配方
     public AntiAlloyRecipe getRecipe(FluidStack alloyStack) {
+        if (!isLoaded) {initRecipes();}
         Fluid alloy = alloyStack.getFluid(); //目前已有合金
         if(!hasRecipe(alloy)){return null;}
         int amount = alloyStack.getAmount(); //目前已有流体量
