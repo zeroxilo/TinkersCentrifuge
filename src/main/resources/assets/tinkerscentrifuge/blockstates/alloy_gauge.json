@@ -1,0 +1,5 @@
+{
+    "variants": {
+        "": { "model": "tinkerscentrifuge:block/alloy_gauge"}
+    }
+}

@@ -20,6 +20,7 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -29,6 +30,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import slimeknights.mantle.block.InventoryBlock;
 import slimeknights.mantle.util.BlockEntityHelper;
@@ -42,6 +44,7 @@ import slimegirl.centrifuge.CentrifugeBlockEntity;
 import javax.annotation.Nullable;
 
 public class CentrifugeBlock extends InventoryBlock implements ITankBlock, EntityBlock {
+    public static final IntegerProperty LIGHT = IntegerProperty.create("light", 0, 15);
 
     private static final VoxelShape SHAPE = Shapes.block();
     /*Shapes.join(
@@ -54,6 +57,13 @@ public class CentrifugeBlock extends InventoryBlock implements ITankBlock, Entit
 
     public CentrifugeBlock(Properties builder) {
         super(builder);
+        registerDefaultState(defaultBlockState().setValue(LIGHT, 0));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
+        builder.add(LIGHT);
     }
 
     @Deprecated
@@ -66,15 +76,12 @@ public class CentrifugeBlock extends InventoryBlock implements ITankBlock, Entit
     @Override
     public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
         return new CentrifugeBlockEntity(pPos, pState);
-        //return new CastingBlockEntity.Basin(pPos, pState);
     }
 
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> check) {
         return CentrifugeBlockEntity.getTicker(pLevel, check, TinkersCentrifuge.CENTRIFUGE_ENTITY.get());
-        //return CentrifugeBlockEntity.getTicker(pLevel, check, TinkerSmeltery.basin.get());
-        //return CastingBlockEntity.getTicker(pLevel, check, TinkerSmeltery.basin.get());
     }
 
     @Override

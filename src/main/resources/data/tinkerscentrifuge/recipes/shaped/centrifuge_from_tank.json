@@ -3,11 +3,12 @@
   "category": "building",
   "key": {
     "s": {"item": "tconstruct:seared_brick"},
-    "r": {"item": "tinkerscentrifuge:rosa_iron_ingot"}
+    "r": {"item": "tinkerscentrifuge:rosa_iron_ingot"},
+    "T": {"tag": "tconstruct:seared_ingot_tank"}
   },
   "pattern": [
     "r r",
-    "r r",
+    "rTr",
     "sss"
   ],
   "result": {

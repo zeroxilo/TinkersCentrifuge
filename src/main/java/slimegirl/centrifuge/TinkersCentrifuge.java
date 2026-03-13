@@ -1,6 +1,9 @@
 package slimegirl.centrifuge;
 
 import com.mojang.logging.LogUtils;
+
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.BlockItem;
@@ -8,6 +11,7 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -25,11 +29,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
 
 import org.slf4j.Logger;
 
@@ -48,6 +54,7 @@ public class TinkersCentrifuge{
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     
+
     //离心机注册
     public static final RegistryObject<CentrifugeBlock> CENTRIFUGE_BLOCK = BLOCKS.register(
         "centrifuge",
@@ -60,6 +67,26 @@ public class TinkersCentrifuge{
     public static final RegistryObject<BlockEntityType<CentrifugeBlockEntity>> CENTRIFUGE_ENTITY = BLOCK_ENTITIES.register(
         "centrifuge_entity", () -> BlockEntityType.Builder.of(CentrifugeBlockEntity::new, CENTRIFUGE_BLOCK.get()).build(null)
     );
+    //合金储罐注册
+    public static final RegistryObject<Block> ALLOY_TANK_BLOCK = BLOCKS.register(
+        "alloy_tank",
+        () -> new SearedTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(5.0f, 6.0f),16000)
+    );
+    
+    public static final RegistryObject<BlockItem> ALLOY_TANK_BLOCK_ITEM = ITEMS.register(
+        "alloy_tank",
+        () -> new BlockItem(ALLOY_TANK_BLOCK.get(), new Item.Properties())
+    );
+    //合金量器注册
+    public static final RegistryObject<Block> ALLOY_GAUGE_BLOCK = BLOCKS.register(
+        "alloy_gauge",
+        () -> new SearedTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(5.0f, 6.0f),16000)
+    );
+    public static final RegistryObject<BlockItem> ALLOY_GAUGE_BLOCK_ITEM = ITEMS.register(
+        "alloy_gauge",
+        () -> new BlockItem(ALLOY_GAUGE_BLOCK.get(), new Item.Properties())
+    );
+
     //月季铁注册
     public static final RegistryObject<Block> ROSA_IRON_BLOCK = BLOCKS.register(
         "rosa_iron_block",
@@ -123,6 +150,7 @@ public class TinkersCentrifuge{
         CREATIVE_MODE_TABS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
         MinecraftForge.EVENT_BUS.register(this);
+        modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::addCreative);
         //context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
@@ -131,10 +159,23 @@ public class TinkersCentrifuge{
         LOGGER.info("HELLO FROM COMMON SETUP");
     }
 
+    private void clientSetup(final FMLClientSetupEvent event){
+        ItemBlockRenderTypes.setRenderLayer(CENTRIFUGE_BLOCK.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(ALLOY_TANK_BLOCK.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(ALLOY_GAUGE_BLOCK.get(), RenderType.cutout());
+    }
+
     // 将离心机添加进创造模式物品栏
     private void addCreative(BuildCreativeModeTabContentsEvent event){
-        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS)
+        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS){
+            event.accept(ROSA_IRON_NUGGET);
+            event.accept(ROSA_IRON_INGOT);
+            event.accept(ROSA_IRON_BLOCK_ITEM);
+            event.accept(MOLTEN_ROSA_IRON_BUCKET);
             event.accept(CENTRIFUGE_BLOCK_ITEM);
+            event.accept(ALLOY_TANK_BLOCK_ITEM);
+            event.accept(ALLOY_GAUGE_BLOCK_ITEM);
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

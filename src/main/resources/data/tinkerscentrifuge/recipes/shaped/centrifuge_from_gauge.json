@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "s": {"item": "tconstruct:seared_brick"},
+    "r": {"item": "tinkerscentrifuge:rosa_iron_ingot"},
+    "G": {"tag": "tconstruct:seared_ingot_gauge"}
+  },
+  "pattern": [
+    "r r",
+    "rGr",
+    "sss"
+  ],
+  "result": {
+    "count": 1,
+    "item": "tinkerscentrifuge:centrifuge"
+  },
+  "show_notification": true
+}

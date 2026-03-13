@@ -1,5 +1,8 @@
 {
     "block.tinkerscentrifuge.centrifuge" : "合金离心机",
+    "block.tinkerscentrifuge.alloy_tank" : "合金储罐（W.I.P.）",
+    "block.tinkerscentrifuge.alloy_gauge" : "合金量器（W.I.P.）",
+
     "item.tinkerscentrifuge.rosa_iron_ingot" : "月季铁锭",
     "item.tinkerscentrifuge.rosa_iron_nugget" : "月季铁粒",
     "block.tinkerscentrifuge.rosa_iron_block" : "月季铁块",
@@ -11,8 +14,8 @@
 	"material.tinkerscentrifuge.rosa_iron.flavor": "它的存在仿佛就是为了提醒你——永远不要让铜待在你的炉子里。",
 
     "modifier.tinkerscentrifuge.amulet": "护符",
-    "modifier.tinkerscentrifuge.amulet.flavor": "铁闪闪！",
-    "modifier.tinkerscentrifuge.amulet.description": "绅士的月季铁能提供一个额外的防御槽！",
+    "modifier.tinkerscentrifuge.amulet.flavor": "铁亮亮！",
+    "modifier.tinkerscentrifuge.amulet.description": "绅士的月季铁能为你提供一个额外的防御槽！",
 
 	"__rose_gold_translation__": "修正玫瑰金的翻译问题，毕竟要对仗",
 	"modifier.tconstruct.enhanced.flavor": "金灿灿！",

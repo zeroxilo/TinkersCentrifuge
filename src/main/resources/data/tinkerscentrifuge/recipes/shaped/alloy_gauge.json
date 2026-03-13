@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "T": {"item": "tconstruct:seared_ingot_gauge"},
+    "r": {"item": "tinkerscentrifuge:rosa_iron_ingot"}
+  },
+  "pattern": [
+    "r r",
+    "rTr",
+    "r r"
+  ],
+  "result": {
+    "count": 1,
+    "item": "tinkerscentrifuge:alloy_gauge"
+  },
+  "show_notification": true
+}

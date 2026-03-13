@@ -1,10 +1,10 @@
-modLoader = "javafml" #mandatory
-loaderVersion = "[47,)" #mandatory
+modLoader = "javafml"
+loaderVersion = "[47,)"
 license = "MIT"
-[[mods]] #mandatory
-modId = "tinkerscentrifuge" #mandatory
-version = "0.0.1" #mandatory
-displayName = "Tinkers' Centrifuge" #mandatory
+[[mods]]
+modId = "tinkerscentrifuge"
+version = "0.1.0"
+displayName = "Tinkers' Centrifuge"
 logoFile = "icon.png"
 authors = "SlimeGirl"
 description = '''

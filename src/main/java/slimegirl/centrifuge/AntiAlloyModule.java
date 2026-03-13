@@ -104,6 +104,9 @@ public class AntiAlloyModule {
                     if (ingredient.getFluids().isEmpty()) {
                         continue;
                     }
+                    /*if (ingredient.catalyst) { //催化剂材料，不消耗自然也不该产出，直接跳过
+                        continue;
+                    }*/
                     FluidStack firstOne = Objects.requireNonNull(ingredient.getFluids().get(0));
                     if(firstOne != null){
                         this.outputs.add(new FluidStack(firstOne.getFluid(), firstOne.getAmount() / 10));

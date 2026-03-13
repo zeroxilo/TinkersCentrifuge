@@ -1,0 +1,8 @@
+{
+  "render_type": "minecraft:cutout",
+  "parent": "tconstruct:block/template/tank",
+  "textures": {
+    "top":  "tinkerscentrifuge:block/alloy_gauge_top",
+    "side": "tinkerscentrifuge:block/alloy_gauge_side"
+  }
+}

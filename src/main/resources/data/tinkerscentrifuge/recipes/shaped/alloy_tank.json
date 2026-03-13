@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "G": {"item": "tconstruct:seared_ingot_tank"},
+    "r": {"item": "tinkerscentrifuge:rosa_iron_ingot"}
+  },
+  "pattern": [
+    "r r",
+    "rGr",
+    "r r"
+  ],
+  "result": {
+    "count": 1,
+    "item": "tinkerscentrifuge:alloy_tank"
+  },
+  "show_notification": true
+}
