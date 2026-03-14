@@ -81,7 +81,7 @@ public class AntiAlloyModule {
                         TinkersCentrifuge.LOGGER.info("[AntiAlloy] Processing alloy recipe: " + alloyRecipe.getId());
                     } else if(recipe_type.equals("forge:conditional")) { //下界合金小巧思配方，目前应该没有别的用
                         if(alloyRecipe.getId().toString().equals("tconstruct:smeltery/alloys/molten_netherite")){
-                            fitToOutputs(JsonHelper.parseList(json.get("recipes").getAsJsonArray().get(1).getAsJsonObject().get("recipe").getAsJsonObject(), "inputs", FluidIngredient::deserialize));
+                            fitToOutputs(JsonHelper.parseList(json.get("recipes").getAsJsonArray().get(0).getAsJsonObject().get("recipe").getAsJsonObject(), "inputs", FluidIngredient::deserialize));
                             TinkersCentrifuge.LOGGER.info("[AntiAlloy] Processing alloy recipe: " + alloyRecipe.getId());
                         }else{
                             TinkersCentrifuge.LOGGER.info("[AntiAlloy] Unknown Conditional Recipe: " + alloyRecipe.getId());

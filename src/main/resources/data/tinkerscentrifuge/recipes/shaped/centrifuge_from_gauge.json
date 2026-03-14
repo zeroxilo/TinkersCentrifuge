@@ -4,7 +4,7 @@
   "key": {
     "s": {"item": "tconstruct:seared_brick"},
     "r": {"item": "tinkerscentrifuge:rosa_iron_ingot"},
-    "G": {"tag": "tconstruct:seared_ingot_gauge"}
+    "G": {"item": "tconstruct:seared_ingot_gauge"}
   },
   "pattern": [
     "r r",

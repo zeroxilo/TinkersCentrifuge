@@ -1,5 +1,6 @@
 {
-    "block.tinkerscentrifuge.centrifuge" : "合金离心机",
+    "tab.tinkerscentrifuge": "匠魂：分离",
+    "block.tinkerscentrifuge.centrifuge" : "合金分离器",
     "block.tinkerscentrifuge.alloy_tank" : "合金储罐（W.I.P.）",
     "block.tinkerscentrifuge.alloy_gauge" : "合金量器（W.I.P.）",
 

@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -27,6 +28,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import slimegirl.centrifuge.AntiAlloyModule.AntiAlloyRecipe;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.mantle.fluid.FluidTransferHelper;
@@ -45,16 +47,20 @@ import slimeknights.tconstruct.library.client.SafeClient;
 
 import javax.annotation.Nullable;
 
-public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBlockEntity {
-    public static final int DEFAULT_CAPACITY = FluidType.BUCKET_VOLUME * 4;
-    public static final int TANK_CAPACITY = FluidType.BUCKET_VOLUME;
+import org.jetbrains.annotations.NotNull;
 
-    private static final Component NAME = TConstruct.makeTranslation("gui", "centrifuge");
+public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBlockEntity {
+    public static final int DEFAULT_CAPACITY = FluidType.BUCKET_VOLUME * 8;
+    public static final int TANK_CAPACITY = FluidType.BUCKET_VOLUME * 1;
+    public static final int TANK_NUM = 8;
+    public static final int PROCESS_TIME = 10;
+
+    private static final Component NAME = Component.translatable("gui.centrifuge");
 
     protected final AntiAlloyModule antiAlloyModule;
     protected AntiAlloyRecipe currentRecipe;
     protected int timer = 0;
-    protected final List<FluidTankAnimated> tanks;
+    protected final MultiFluidTank tanks;
     private final LazyOptional<IFluidHandler> fluidHolder;
     /** Last redstone state of the block */
     private boolean lastRedstone = false;
@@ -78,11 +84,8 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     protected CentrifugeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state, NAME, 2, 1);
         antiAlloyModule = new AntiAlloyModule(this.getLevel());
-        tanks = List.of(new FluidTankAnimated(TANK_CAPACITY, this),
-            new FluidTankAnimated(TANK_CAPACITY, this),
-            new FluidTankAnimated(TANK_CAPACITY, this),
-            new FluidTankAnimated(TANK_CAPACITY, this));
-        fluidHolder = LazyOptional.of(() -> tanks.get(0));
+        tanks = new MultiFluidTank(TANK_NUM, TANK_CAPACITY, this);
+        fluidHolder = LazyOptional.of(() -> tanks);
     }
 
     @Nullable
@@ -99,70 +102,62 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     private void serverTick(Level level, BlockPos pos) {
         //配方获取逻辑
         if (currentRecipe == null) {
-            IFluidHandler transferFrom = findFluidHandler(Direction.UP).orElse(null);
-            if (transferFrom != null) {
+            findFluidHandler(Direction.UP).ifPresent(transferFrom -> {
                 for(int i = 0;i < transferFrom.getTanks();i++){
                     FluidStack currentFluid = transferFrom.getFluidInTank(i);
                     antiAlloyModule.setLevel(this.level);
-                    if (!currentFluid.isEmpty()){
-                        if (antiAlloyModule.hasRecipe(currentFluid)) {
-                            AntiAlloyRecipe recipe = antiAlloyModule.getRecipe(currentFluid);
-                            if (recipe != null) {
-                                //汲取合金，开始处理
-                                transferFrom.drain(recipe.getInput(), IFluidHandler.FluidAction.EXECUTE);
-                                currentRecipe = recipe;
-                                timer = 10;//处理时间
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        //配方处理逻辑
-        if(currentRecipe != null && timer > 0){
-            timer--;
-            //处理完成
-            if (timer == 0) {
-                //返还原料
-                List<FluidStack> outputs = currentRecipe.getOutputs();
-                for(FluidStack output : outputs){
-                    if(output.isEmpty()){
-                        continue;
-                    }
-                    TinkersCentrifuge.LOGGER.info("[AntiAlloy]Try to output "+output.getDisplayName().getString());
-                    FluidStack remainder = output.copy();
-                    for(FluidTankAnimated tank : tanks){
-                        int filled = tank.fill(remainder, IFluidHandler.FluidAction.SIMULATE);
-                        if(filled == output.getAmount()){
-                            tank.fill(remainder, IFluidHandler.FluidAction.EXECUTE);
+                    if (!currentFluid.isEmpty() && antiAlloyModule.hasRecipe(currentFluid)) {
+                        AntiAlloyRecipe recipe = antiAlloyModule.getRecipe(currentFluid);
+                        //检查配方产物的空间是否充足
+                        if (recipe != null && this.tanks.fitAll(recipe.outputs)){
+                            //汲取合金，开始处理
+                            transferFrom.drain(recipe.getInput(), FluidAction.EXECUTE);
+                            //TinkersCentrifuge.LOGGER.info("[AntiAlloy] "+recipe.getInput().getDisplayName().getString()+" Recipe Start.");
+                            //TinkersCentrifuge.LOGGER.info("[AntiAlloy] Drained"+recipe.getInput().getAmount()+"mb "+recipe.getInput().getDisplayName().getString()+".");
+                            currentRecipe = recipe;
+                            timer = PROCESS_TIME;//处理时间
                             break;
-                        }else if(filled > 0){
-                            remainder.shrink(filled);
-                            tank.fill(new FluidStack(output.getFluid(), filled), IFluidHandler.FluidAction.EXECUTE);
                         }
                     }
                 }
-                currentRecipe = null;
+            });
+        }
+        //计时器
+        if(timer > 0){
+            timer--;
+        }
+        //配方处理完成
+        if(currentRecipe != null && timer <= 0){
+            //TinkersCentrifuge.LOGGER.info("[AntiAlloy] "+currentRecipe.input.getDisplayName().getString()+" Recipe Complete.");
+            //返还配方产物，即合金原料
+            List<FluidStack> outputs = currentRecipe.getOutputs();
+            for(FluidStack output : outputs){
+                if(output.isEmpty()) continue;
+                int filled = tanks.fill(output, FluidAction.SIMULATE);
+                if(filled > 0){
+                    tanks.fill(output, FluidAction.EXECUTE);
+                }
+                //TinkersCentrifuge.LOGGER.info("[AntiAlloy] Filled "+filled+"mb "+output.getDisplayName().getString());
+                //已经做足了容量检查，如果还是溢出了，那真没办法了，你浪费吧。
+                //W.I.P. 做溢出保护
             }
+            currentRecipe = null;
         }
         //尝试将输出槽的液体依次输出到下方的容器中
-        IFluidHandler transferTarget = findFluidHandler(Direction.DOWN).orElse(null);
-        if (transferTarget != null){
-            for(FluidTankAnimated tank : tanks){
-                if(!tank.isEmpty()){
-                    FluidStack output = tank.getFluid();
-                    int filled = transferTarget.fill(output, IFluidHandler.FluidAction.EXECUTE);
-                    if(filled > 0){
-                        tank.drain(filled, IFluidHandler.FluidAction.EXECUTE);
-                    }
-                    if (!tank.isEmpty()){
-                        break;
-                    }
+        findFluidHandler(Direction.DOWN).ifPresent(transferTarget -> {
+            if(!tanks.isEmpty()){
+                FluidStack output = tanks.getFluid();
+                int filled = transferTarget.fill(output, FluidAction.SIMULATE);
+                if(filled == output.getAmount()){
+                    transferTarget.fill(output, FluidAction.EXECUTE);
+                    tanks.drain(output, FluidAction.EXECUTE);
+                }else if(filled > 0){
+                    transferTarget.fill(new FluidStack(output,filled), FluidAction.EXECUTE);
+                    tanks.drain(new FluidStack(output,filled), FluidAction.EXECUTE);
                 }
             }
-        }
+        });
     }
-
 
     //比较器相关配置
     public void setLastStrength(int strength) {
@@ -174,36 +169,32 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     @Override
     public int comparatorStrength() {
         int total_power = 0;
-        for(FluidTankAnimated tank : tanks){
-            if(!tank.isEmpty()){
-                total_power += 4;
+        for(FluidStack fluid : tanks.fluids){
+            if(!fluid.isEmpty()){
+                total_power += 2;
             }
         }
-        return total_power;
+        return Math.max(total_power,15);
     }
 
 
     public static int getCapacity(Block block) {
         return DEFAULT_CAPACITY;
     }
-    public FluidTankAnimated getTank() {
-        return tanks.get(0);
-    }
     
     @Override
     public void updateFluidTo(FluidStack fluid) {
         // update tank fluid
-        FluidTankAnimated tank = getTank();
-        int oldAmount = tank.getFluidAmount();
+        int oldAmount = tanks.getFluidAmount();
         int newAmount = fluid.getAmount();
-        tank.setFluid(fluid);
+        tanks.setFluid(0,fluid);
 
         // update the tank render offset from the change
-        tank.setRenderOffset(tank.getRenderOffset() + newAmount - oldAmount);
+        tanks.setRenderOffset(tanks.getRenderOffset() + newAmount - oldAmount);
 
         // update the block model
         if (isFluidInModel()) {
-            SafeClient.updateFluidModel(getTE(), tank, oldAmount, newAmount);
+            SafeClient.updateFluidModel(getTE(), tanks, oldAmount, newAmount);
         }
     }
 
@@ -232,18 +223,9 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     //从nbt数据中获取流体信息并更新
     public void updateTank(CompoundTag nbt) {
         if (nbt.isEmpty()) {
-            for (FluidTankAnimated tank : tanks) {
-                tank.setFluid(FluidStack.EMPTY);
-            }
+            tanks.setFluid(FluidStack.EMPTY);
         } else {
-            for(int i = 0; i < tanks.size(); i++){
-                if(nbt.contains("tank" + i) && !nbt.getCompound("tank" + i).isEmpty()){
-                    CompoundTag outputTag = nbt.getCompound("tank" + i);
-                    tanks.get(i).readFromNBT(outputTag);
-                }else{
-                    tanks.get(i).setFluid(FluidStack.EMPTY);
-                }
-            }
+            tanks.readFromNBT(nbt);
             //CentrifugeBlockEntity.updateLight(this, tank);
         }
     }
@@ -252,13 +234,7 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     @Override
     public void saveSynced(CompoundTag tag) {
         super.saveSynced(tag);
-        // want tank on the client on world load
-        for(int i = 0; i < tanks.size(); i++){
-            if(!tanks.get(i).isEmpty()){
-                tag.put("tank" + i,tanks.get(i).writeToNBT(new CompoundTag()));
-                break;
-            }
-        }
+        tanks.writeToNBT(tag);
     }
 
     @Override
@@ -271,8 +247,8 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     @Override
     public ModelData getModelData() {
         return ModelData.builder()
-        .with(ModelProperties.FLUID_STACK, tanks.get(0).getFluid())
-        .with(ModelProperties.TANK_CAPACITY, tanks.get(0).getCapacity())
+        .with(ModelProperties.FLUID_STACK, tanks.getFluid())
+        .with(ModelProperties.TANK_CAPACITY, tanks.getCapacity())
         .build();
     }
 
@@ -287,7 +263,7 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
 
     @Override
     public void load(CompoundTag tag) {
-        updateTank(tag.getCompound("tank"));
+        updateTank(tag);
         lastRedstone = tag.getBoolean(TAG_REDSTONE);
         super.load(tag);
     }
@@ -302,5 +278,10 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     @Override
     public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
         return null;
+    }
+
+    @Override
+    public FluidTankAnimated getTank() {
+        return tanks;
     }
 }
