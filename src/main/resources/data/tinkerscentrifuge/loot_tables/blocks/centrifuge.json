@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [{"condition": "minecraft:survives_explosion"}],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_name",
+              "source": "block_entity"
+            },
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {"op": "replace","source": "tank0","target": "tank0"},
+                {"op": "replace","source": "tank1","target": "tank1"},
+                {"op": "replace","source": "tank2","target": "tank2"},
+                {"op": "replace","source": "tank3","target": "tank3"},
+                {"op": "replace","source": "tank4","target": "tank4"},
+                {"op": "replace","source": "tank5","target": "tank5"},
+                {"op": "replace","source": "tank6","target": "tank6"},
+                {"op": "replace","source": "tank7","target": "tank7"}
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "tinkerscentrifuge:centrifuge"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ]
+}

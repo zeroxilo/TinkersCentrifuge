@@ -75,7 +75,10 @@ public class TinkersCentrifuge{
     //离心机注册
     public static final RegistryObject<CentrifugeBlock> CENTRIFUGE_BLOCK = BLOCKS.register(
         "centrifuge",
-        () -> new CentrifugeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f))
+        () -> new CentrifugeBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f)
+            .requiresCorrectToolForDrops()
+        )
     );
     public static final RegistryObject<BlockItem> CENTRIFUGE_BLOCK_ITEM = ITEMS.register(
         "centrifuge",
@@ -119,7 +122,10 @@ public class TinkersCentrifuge{
     //月季铁注册
     public static final RegistryObject<Block> ROSA_IRON_BLOCK = BLOCKS.register(
         "rosa_iron_block",
-        () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(5.0f, 6.0f))
+        () -> new Block(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.COLOR_ORANGE).strength(5.0f, 6.0f)
+            .requiresCorrectToolForDrops()
+        )
     );
     public static final RegistryObject<BlockItem> ROSA_IRON_BLOCK_ITEM = ITEMS.register(
         "rosa_iron_block",

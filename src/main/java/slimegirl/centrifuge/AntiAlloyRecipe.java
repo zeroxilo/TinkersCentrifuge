@@ -18,11 +18,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.common.extensions.IForgeFluid;
+import net.minecraftforge.common.extensions.IForgeItem;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
@@ -122,10 +128,29 @@ public class AntiAlloyRecipe implements ICustomOutputRecipe<IAntiAlloyTank>{
                 /*if (ingredient.catalyst) { //催化剂材料，不消耗自然也不该产出，直接跳过
                     continue;
                 }*/
-                FluidStack firstOne = Objects.requireNonNull(ingredient.getFluids().get(0));
-                if(firstOne != null){
-                    Fluid mat_fluid = firstOne.getFluid();
-                    int mat_amount = firstOne.getAmount() / 10;
+                //遍历可行流体，尽可能寻找原版、匠魂本家的材料（毕竟是匠魂的附属...）
+                FluidStack pickedFluid = FluidStack.EMPTY;
+                boolean picked = false;
+                for(FluidStack fluid : ingredient.getFluids()){
+                    if(!fluid.isEmpty() && fluid.getFluid().getBucket() != null){
+                        FluidType fluidType = fluid.getFluid().getFluidType();
+                        try{ // 尝试获取注册ID
+                            String nameSpace = ((IForgeRegistry)ForgeRegistries.FLUID_TYPES.get()).getKey(fluidType).getNamespace().toString();
+                            if(fluidType.isVanilla() || nameSpace == "tconstruct" || nameSpace == "tinkerscentrifuge" || nameSpace == "minecraft"){
+                                pickedFluid = fluid;
+                                picked = true;
+                            }
+                        }finally{}
+                    }
+                }
+                //还没有？那只能取第一个用了
+                if(!picked && ingredient.getFluids().size() > 0){
+                    pickedFluid = ingredient.getFluids().get(0);
+                }
+                //将取得的流体作为输出加入到配方中
+                if(pickedFluid != null){
+                    Fluid mat_fluid = pickedFluid.getFluid();
+                    int mat_amount = pickedFluid.getAmount() / 10;
                     this.outputs.add(FluidOutput.fromFluid(mat_fluid,mat_amount));
                 }
             }

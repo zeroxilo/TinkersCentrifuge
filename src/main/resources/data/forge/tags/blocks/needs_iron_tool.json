@@ -1,0 +1,8 @@
+{
+  "values": [
+    "tinkerscentrifuge:centrifuge",
+    "tinkerscentrifuge:alloy_tank",
+    "tinkerscentrifuge:alloy_gauge",
+    "tinkerscentrifuge:rosa_iron_block"
+  ]
+}
