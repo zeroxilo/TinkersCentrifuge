@@ -15,11 +15,7 @@
             {
               "function": "minecraft:copy_nbt",
               "ops": [
-                {
-                  "op": "replace",
-                  "source": "tank",
-                  "target": "tank"
-                }
+                {"op": "replace","source": "tank","target": "tank"}
               ],
               "source": "block_entity"
             }
