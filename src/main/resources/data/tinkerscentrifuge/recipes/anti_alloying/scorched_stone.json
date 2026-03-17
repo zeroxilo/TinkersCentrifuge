@@ -1,0 +1,11 @@
+{
+	"type": "tinkerscentrifuge:anti_alloy",
+	"input": {
+		"fluid": "tconstruct:scorched_stone",
+		"amount": 10
+	},
+	"result": [
+		{ "fluid": "tconstruct:magma","amount": 5 }
+	],
+	"temperature": 100
+}

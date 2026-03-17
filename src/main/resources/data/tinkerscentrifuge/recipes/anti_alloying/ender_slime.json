@@ -1,0 +1,12 @@
+{
+	"type": "tinkerscentrifuge:anti_alloy",
+	"input": {
+		"fluid": "tconstruct:ender_slime",
+		"amount": 10
+	},
+	"result": [
+		{ "fluid": "tconstruct:earth_slime","amount": 10 },
+		{ "fluid": "tconstruct:molten_ender","amount": 1 }
+	],
+	"temperature": -30
+}

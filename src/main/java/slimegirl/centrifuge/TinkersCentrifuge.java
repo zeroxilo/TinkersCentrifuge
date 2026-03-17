@@ -10,10 +10,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -38,9 +39,11 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.mantle.registration.deferred.SynchronizedDeferredRegister;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
-import slimeknights.tconstruct.smeltery.client.render.GaugeBlockEntityRenderer;
-import slimeknights.tconstruct.smeltery.client.render.TankBlockEntityRenderer;
 import slimeknights.tconstruct.smeltery.item.TankItem;
 
 import org.slf4j.Logger;
@@ -56,7 +59,9 @@ public class TinkersCentrifuge{
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(ForgeRegistries.FLUIDS, MODID);
     public static final DeferredRegister<FluidType> FLUID_TYPES = DeferredRegister.create(ForgeRegistries.Keys.FLUID_TYPES, MODID);
-    
+    public static final SynchronizedDeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = SynchronizedDeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MODID);
+    private static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, MODID);
+
     protected static final Item.Properties ITEM_PROPS = new Item.Properties();
     
     //创造模式物品栏
@@ -80,6 +85,18 @@ public class TinkersCentrifuge{
         "centrifuge_entity",
         () -> BlockEntityType.Builder.of(CentrifugeBlockEntity::new, CENTRIFUGE_BLOCK.get()).build(null)
     );
+    //离心配方注册
+    public static final RegistryObject<RecipeSerializer<AntiAlloyRecipe>> antiAlloyingSerializer  = RECIPE_SERIALIZERS.register("anti_alloy", () -> LoadableRecipeSerializer.of(AntiAlloyRecipe.LOADER));
+    public static final RegistryObject<RecipeType<AntiAlloyRecipe>> ANTI_ALLOYING = RECIPE_TYPES.register(
+        "anti_alloy",
+        () -> new RecipeType<AntiAlloyRecipe>() {
+            @Override
+            public String toString() {
+                return MODID + ":anti_alloy";
+            }
+        }
+    );
+
     //合金储罐注册
     public static final RegistryObject<Block> ALLOY_TANK_BLOCK = BLOCKS.register(
         "alloy_tank",
@@ -89,6 +106,7 @@ public class TinkersCentrifuge{
         "alloy_tank",
         () -> new TankItem(ALLOY_TANK_BLOCK.get(), ITEM_PROPS, true)
     );
+
     //合金量器注册
     public static final RegistryObject<Block> ALLOY_GAUGE_BLOCK = BLOCKS.register(
         "alloy_gauge",
@@ -160,6 +178,8 @@ public class TinkersCentrifuge{
         FLUID_TYPES.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
+        RECIPE_SERIALIZERS.register(modEventBus);
+        RECIPE_TYPES.register(modEventBus);
         MinecraftForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::addCreative);

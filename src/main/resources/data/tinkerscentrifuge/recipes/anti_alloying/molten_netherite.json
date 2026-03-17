@@ -1,0 +1,12 @@
+{
+	"type": "tinkerscentrifuge:anti_alloy",
+	"input": {
+		"fluid": "tconstruct:molten_netherite",
+		"amount": 1
+	},
+	"result": [
+		{ "fluid": "tconstruct:molten_debris","amount": 4 },
+		{ "fluid": "tconstruct:molten_gold","amount": 2 }
+	],
+	"temperature": -50
+}

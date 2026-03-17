@@ -1,0 +1,11 @@
+{
+	"type": "tinkerscentrifuge:anti_alloy",
+	"input": {
+		"fluid": "tconstruct:meat_soup",
+		"amount": 10
+	},
+	"result": [
+		{ "fluid": "minecraft:water","amount": 10 }
+	],
+	"temperature": 100
+}

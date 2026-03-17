@@ -1,0 +1,12 @@
+{
+	"type": "tinkerscentrifuge:anti_alloy",
+	"input": {
+		"fluid": "tconstruct:sky_slime",
+		"amount": 10
+	},
+	"result": [
+		{ "fluid": "tconstruct:earth_slime","amount": 10 },
+		{ "fluid": "minecraft:water","amount": 10 }
+	],
+	"temperature": -30
+}

@@ -3,12 +3,12 @@ loaderVersion = "[47,)"
 license = "MIT"
 [[mods]]
 modId = "tinkerscentrifuge"
-version = "0.1.0"
+version = "0.1.2"
 displayName = "Tinkers' Centrifuge"
 logoFile = "icon.png"
 authors = "SlimeGirl"
 description = '''
-
+An alloy dismantle MOD
 '''
 [[dependencies.tinkerscentrifuge]]
 modId = "forge"

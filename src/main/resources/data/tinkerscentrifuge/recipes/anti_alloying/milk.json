@@ -1,0 +1,11 @@
+{
+	"type": "tinkerscentrifuge:anti_alloy",
+	"input": {
+		"fluid": "minecraft:milk",
+		"amount": 10
+	},
+	"result": [
+		{ "fluid": "minecraft:water","amount": 10 }
+	],
+	"temperature": 100
+}

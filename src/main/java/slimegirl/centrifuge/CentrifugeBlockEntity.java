@@ -8,19 +8,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -29,25 +25,14 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import slimegirl.centrifuge.AntiAlloyModule.AntiAlloyRecipe;
 import slimeknights.mantle.util.BlockEntityHelper;
-import slimeknights.mantle.fluid.FluidTransferHelper;
-import slimeknights.mantle.fluid.transfer.FluidContainerTransferManager;
-import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer;
-import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
-import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
-import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe;
-import slimeknights.tconstruct.library.utils.NBTTags;
 import slimeknights.tconstruct.shared.block.entity.TableBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
 import slimeknights.tconstruct.library.client.SafeClient;
 
 import javax.annotation.Nullable;
-
-import org.jetbrains.annotations.NotNull;
 
 public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBlockEntity {
     public static final int DEFAULT_CAPACITY = FluidType.BUCKET_VOLUME * 8;
@@ -109,7 +94,7 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
                     if (!currentFluid.isEmpty() && antiAlloyModule.hasRecipe(currentFluid)) {
                         AntiAlloyRecipe recipe = antiAlloyModule.getRecipe(currentFluid);
                         //检查配方产物的空间是否充足
-                        if (recipe != null && this.tanks.fitAll(recipe.outputs)){
+                        if (recipe != null && this.tanks.fitAll(recipe.getOutputs())){
                             //汲取合金，开始处理
                             transferFrom.drain(recipe.getInput(), FluidAction.EXECUTE);
                             //TinkersCentrifuge.LOGGER.info("[AntiAlloy] "+recipe.getInput().getDisplayName().getString()+" Recipe Start.");

@@ -1,0 +1,11 @@
+{
+	"type": "tinkerscentrifuge:anti_alloy",
+	"input": {
+		"fluid": "tconstruct:seared_stone",
+		"amount": 10
+	},
+	"result": [
+		{ "fluid": "tconstruct:molten_clay","amount": 5 }
+	],
+	"temperature": 100
+}

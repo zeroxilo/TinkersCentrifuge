@@ -1,0 +1,12 @@
+{
+	"type": "tinkerscentrifuge:anti_alloy",
+	"input": {
+		"fluid": "tconstruct:ichor",
+		"amount": 10
+	},
+	"result": [
+		{ "fluid": "tconstruct:earth_slime","amount": 10 },
+		{ "fluid": "tconstruct:liquid_soul","amount": 1 }
+	],
+	"temperature": -30
+}

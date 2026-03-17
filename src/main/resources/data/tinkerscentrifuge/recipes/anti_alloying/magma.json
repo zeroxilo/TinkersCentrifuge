@@ -1,0 +1,12 @@
+{
+	"type": "tinkerscentrifuge:anti_alloy",
+	"input": {
+		"fluid": "tconstruct:magma",
+		"amount": 10
+	},
+	"result": [
+		{ "fluid": "tconstruct:earth_slime","amount": 2 },
+		{ "fluid": "minecraft:lava","amount": 2 }
+	],
+	"temperature": 20
+}

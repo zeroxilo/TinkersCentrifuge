@@ -1,3 +1,17 @@
---0.0.1 Centrifuge
-* Add Centrifuge - Main stuff of the mod.
-* Add Material/Alloy Rosa Iron
+--0.1.2 反合金配方 Anti-Alloy Recipe
+* 重置了分离器的反合金逻辑，现在它可以读取data/xxx/recipes下的专门配方了
+  Remake the Centrifuge anti-alloy method, now it can figure out data/xxx/recipes.
+* 添加新的配方类型：tinkerscentrifuge:anti_alloy
+  Add new Recipe Type: tinkerscentrifuge:anti_alloy
+* 添加了一些莫名其妙的匠魂液体的反合金配方，例如：
+  Add few TiC Fluid's Anti-Alloy recipe, such as:
+  + 10mb Milk → 10mb Water
+  + 10mb Magma → 2mb Lava + 2mb Earth Slime
+* 上述配方不存在“反反合金”配方，无法逆向合成。
+  These recipes are for Anti-Alloys only, cannot be Alloy again.
+
+--0.1.0 分离器 Centrifuge
+* 增加分离器 - 模组的核心设备
+  Add Centrifuge - Main stuff of the mod.
+* 添加材料/合金 - 月季铁
+  Add Material/Alloy Rosa Iron
