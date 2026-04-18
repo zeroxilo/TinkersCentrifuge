@@ -122,14 +122,16 @@ public class CentrifugeBlockEntity extends ServantTileEntity implements ITankBlo
         //尝试将输出槽的液体依次输出到下方的容器中
         findFluidHandler(Direction.DOWN).ifPresent(transferTarget -> {
             if(!tanks.isEmpty()){
-                FluidStack output = tanks.getFluid();
-                int filled = transferTarget.fill(output, FluidAction.SIMULATE);
-                if(filled == output.getAmount()){
-                    transferTarget.fill(output, FluidAction.EXECUTE);
-                    tanks.drain(output, FluidAction.EXECUTE);
-                }else if(filled > 0){
-                    transferTarget.fill(new FluidStack(output,filled), FluidAction.EXECUTE);
-                    tanks.drain(new FluidStack(output,filled), FluidAction.EXECUTE);
+                for (FluidStack output: tanks.fluids){
+                    if (output.isEmpty()) continue;
+                    int filled = transferTarget.fill(output, FluidAction.SIMULATE);
+                    if(filled == output.getAmount()){
+                        transferTarget.fill(output, FluidAction.EXECUTE);
+                        tanks.drain(output, FluidAction.EXECUTE);
+                    }else if(filled > 0){
+                        transferTarget.fill(new FluidStack(output,filled), FluidAction.EXECUTE);
+                        tanks.drain(new FluidStack(output,filled), FluidAction.EXECUTE);
+                    }
                 }
             }
         });
