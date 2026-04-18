@@ -28,9 +28,9 @@ public class MoltenFluidType extends FluidType {
 
     public MoltenFluidType(String name,final Properties properties) {
         this(
-            new ResourceLocation(TinkersCentrifuge.MODID, "fluid/" + name + "_still"),
-            new ResourceLocation(TinkersCentrifuge.MODID, "fluid/" + name + "_flowing"),
-            new ResourceLocation(TinkersCentrifuge.MODID, "fluid/" + name + "_overlay"),
+            ResourceLocation.fromNamespaceAndPath(TinkersCentrifuge.MODID, "fluid/" + name + "_still"),
+            ResourceLocation.fromNamespaceAndPath(TinkersCentrifuge.MODID, "fluid/" + name + "_flowing"),
+            ResourceLocation.fromNamespaceAndPath(TinkersCentrifuge.MODID, "fluid/" + name + "_overlay"),
             -1,
             new Vector3f(1.0f, 1.0f, 1.0f),
             properties

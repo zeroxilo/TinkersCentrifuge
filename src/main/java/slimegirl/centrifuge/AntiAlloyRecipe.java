@@ -72,12 +72,12 @@ public class AntiAlloyRecipe implements ICustomOutputRecipe<IAntiAlloyTank>{
         Fluid alloyFluid = alloyRecipe.getOutput().getFluid();
         int alloyAmount = alloyRecipe.getOutput().getAmount() / 10;
         this.input = new AntiAlloyIngredient(FluidIngredient.of(new FluidStack(alloyFluid,alloyAmount)),false);
-        this.id = new ResourceLocation("tinkerscentrifuge",alloyRecipe.getId().getPath()+"_reversed");
+        this.id = ResourceLocation.fromNamespaceAndPath("tinkerscentrifuge",alloyRecipe.getId().getPath()+"_reversed");
         this.temperature = 0;
         this.outputs = new ArrayList<FluidOutput>();
         //尝试根据原有配方构造输入输出
         try {
-            ResourceLocation recipePath = new ResourceLocation(
+            ResourceLocation recipePath = ResourceLocation.fromNamespaceAndPath(
                 alloyRecipe.getId().getNamespace(),
                 "recipes/" + alloyRecipe.getId().getPath() + ".json"
             );
