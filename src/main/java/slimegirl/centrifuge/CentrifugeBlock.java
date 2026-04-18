@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -19,12 +20,14 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import slimeknights.tconstruct.library.utils.NBTTags;
+import slimeknights.tconstruct.smeltery.block.component.SearedBlock;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
+import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity.ITankBlock;
 
 import javax.annotation.Nullable;
 
-public class CentrifugeBlock extends SearedTankBlock {
+public class CentrifugeBlock extends SearedBlock implements ITankBlock, EntityBlock {
 
     private static final VoxelShape SHAPE = Shapes.block();
     /*Shapes.join(
@@ -36,7 +39,7 @@ public class CentrifugeBlock extends SearedTankBlock {
         BooleanOp.ONLY_FIRST);*/
 
     public CentrifugeBlock(Properties builder) {
-        super(builder, CentrifugeBlockEntity.DEFAULT_CAPACITY);
+        super(builder, true);
     }
 
     @Deprecated
@@ -61,7 +64,7 @@ public class CentrifugeBlock extends SearedTankBlock {
     public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         CompoundTag nbt = stack.getTag();
         if (nbt != null && worldIn.getBlockEntity(pos) instanceof CentrifugeBlockEntity tank) {
-            tank.updateTank(nbt.getCompound(NBTTags.TANK));
+            tank.updateTank(nbt);
         }
         super.setPlacedBy(worldIn, pos, state, placer, stack);
     }

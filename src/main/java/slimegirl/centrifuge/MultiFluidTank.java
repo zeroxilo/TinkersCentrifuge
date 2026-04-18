@@ -1,6 +1,8 @@
 package slimegirl.centrifuge;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
@@ -11,7 +13,7 @@ import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultiFluidTank extends FluidTankAnimated{
+public class MultiFluidTank extends FluidTankAnimated {
    public @NotNull List<FluidStack> fluids;
    public int capacity;
 
@@ -27,12 +29,25 @@ public class MultiFluidTank extends FluidTankAnimated{
    //读取自nbt
    @Override
    public FluidTank readFromNBT(CompoundTag nbt) {
-      for (int i = 0; i < this.fluids.size(); i++) {
-         String key = "tank" + i;
-         if (nbt.contains(key)) {
-            this.fluids.set(i, FluidStack.loadFluidStackFromNBT(nbt.getCompound(key)));
-         } else {
-            this.fluids.set(i, FluidStack.EMPTY); // 明确设置为 EMPTY
+      // New format
+      if (nbt.contains("tanks", Tag.TAG_LIST)) {
+         ListTag tankList = nbt.getList("tanks", Tag.TAG_COMPOUND);
+         for (int i = 0; i < this.fluids.size(); i++) {
+            if (i < tankList.size()) {
+               CompoundTag tankTag = tankList.getCompound(i);
+               this.fluids.set(i, FluidStack.loadFluidStackFromNBT(tankTag));
+            } else {
+               this.fluids.set(i, FluidStack.EMPTY);
+            }
+         }
+      } else { // Old format for backwards compatibility
+         for (int i = 0; i < this.fluids.size(); i++) {
+            String key = "tank" + i;
+            if (nbt.contains(key, Tag.TAG_COMPOUND)) {
+               this.fluids.set(i, FluidStack.loadFluidStackFromNBT(nbt.getCompound(key)));
+            } else {
+               this.fluids.set(i, FluidStack.EMPTY);
+            }
          }
       }
       return this;
@@ -41,13 +56,13 @@ public class MultiFluidTank extends FluidTankAnimated{
    //写入nbt
    @Override
    public CompoundTag writeToNBT(CompoundTag nbt) {
-      for(int i = 0;i < this.fluids.size();i++){
-         CompoundTag subNbt = new CompoundTag();
-         if(!this.fluids.get(i).isEmpty()){
-            this.fluids.get(i).writeToNBT(subNbt);
-            nbt.put("tank"+i, subNbt);
-         }
+      ListTag tankList = new ListTag();
+      for (FluidStack fluid : this.fluids) {
+         CompoundTag fluidNBT = new CompoundTag();
+         fluid.writeToNBT(fluidNBT);
+         tankList.add(fluidNBT);
       }
+      nbt.put("tanks", tankList);
       return nbt;
    }
 
