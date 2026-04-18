@@ -27,10 +27,12 @@ public class MultiFluidTank extends FluidTankAnimated{
    //读取自nbt
    @Override
    public FluidTank readFromNBT(CompoundTag nbt) {
-      for(int i = 0;i < this.fluids.size();i++){
-         CompoundTag subNbt = nbt.getCompound("tank"+i);
-         if(subNbt != null){
-            this.fluids.set(i,FluidStack.loadFluidStackFromNBT(subNbt));
+      for (int i = 0; i < this.fluids.size(); i++) {
+         String key = "tank" + i;
+         if (nbt.contains(key)) {
+            this.fluids.set(i, FluidStack.loadFluidStackFromNBT(nbt.getCompound(key)));
+         } else {
+            this.fluids.set(i, FluidStack.EMPTY); // 明确设置为 EMPTY
          }
       }
       return this;
@@ -65,8 +67,8 @@ public class MultiFluidTank extends FluidTankAnimated{
    @Override
    public int getTankCapacity(int arg0) {return this.capacity;}
 
-   //获取整体容量
-   public int getCapacity() {return this.capacity * this.fluids.size();}
+   //获取单个容量
+   public int getCapacity() {return this.capacity;}
 
    
    //修改整体容量
@@ -88,9 +90,9 @@ public class MultiFluidTank extends FluidTankAnimated{
    //获取容器内首个可用流体
    @Override
    public FluidStack getFluid() {
-      for(int i = 0;i< this.fluids.size();i++){
-         if (!this.fluids.isEmpty()){
-            return this.fluids.get(i);
+      for (FluidStack fluidStack : this.fluids) {
+         if (fluidStack != null && !fluidStack.isEmpty()) {
+            return fluidStack;
          }
       }
       return FluidStack.EMPTY;

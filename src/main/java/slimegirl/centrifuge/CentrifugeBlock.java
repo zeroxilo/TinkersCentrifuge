@@ -10,26 +10,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition.Builder;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import slimeknights.mantle.block.InventoryBlock;
 import slimeknights.tconstruct.library.utils.NBTTags;
+import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
-import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity.ITankBlock;
 
 import javax.annotation.Nullable;
 
-public class CentrifugeBlock extends InventoryBlock implements ITankBlock, EntityBlock {
-    public static final IntegerProperty LIGHT = IntegerProperty.create("light", 0, 15);
+public class CentrifugeBlock extends SearedTankBlock {
 
     private static final VoxelShape SHAPE = Shapes.block();
     /*Shapes.join(
@@ -41,14 +36,7 @@ public class CentrifugeBlock extends InventoryBlock implements ITankBlock, Entit
         BooleanOp.ONLY_FIRST);*/
 
     public CentrifugeBlock(Properties builder) {
-        super(builder);
-        registerDefaultState(defaultBlockState().setValue(LIGHT, 0));
-    }
-
-    @Override
-    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder);
-        builder.add(LIGHT);
+        super(builder, CentrifugeBlockEntity.DEFAULT_CAPACITY);
     }
 
     @Deprecated
@@ -95,7 +83,7 @@ public class CentrifugeBlock extends InventoryBlock implements ITankBlock, Entit
             tank.swap();
         }*/
     }
-    
+
     /* Comparator support */
 
     @Deprecated

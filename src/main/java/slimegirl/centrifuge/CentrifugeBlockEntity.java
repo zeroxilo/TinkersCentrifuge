@@ -3,10 +3,6 @@ package slimegirl.centrifuge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -22,22 +18,20 @@ import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.tconstruct.common.multiblock.ServantTileEntity;
 import slimeknights.tconstruct.library.client.SafeClient;
 import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
-import slimeknights.tconstruct.shared.block.entity.TableBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBlockEntity {
+public class CentrifugeBlockEntity extends ServantTileEntity implements ITankBlockEntity {
     public static final int DEFAULT_CAPACITY = FluidType.BUCKET_VOLUME * 8;
     public static final int TANK_CAPACITY = FluidType.BUCKET_VOLUME * 1;
     public static final int TANK_NUM = 8;
-
-    private static final Component NAME = Component.translatable("gui.centrifuge");
 
     protected final AntiAlloyModule antiAlloyModule;
     protected AntiAlloyRecipe currentRecipe;
@@ -64,7 +58,7 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     /* 内容初始化 */
     @SuppressWarnings("WeakerAccess")
     protected CentrifugeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-        super(type, pos, state, NAME, 2, 1);
+        super(type, pos, state);
         antiAlloyModule = new AntiAlloyModule(this.getLevel());
         tanks = new MultiFluidTank(TANK_NUM, TANK_CAPACITY, this);
         fluidHolder = LazyOptional.of(() -> tanks);
@@ -167,7 +161,7 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     @Override
     public void updateFluidTo(FluidStack fluid) {
         // update tank fluid
-        int oldAmount = tanks.getFluidAmount();
+        int oldAmount = tanks.getFluid().getAmount();
         int newAmount = fluid.getAmount();
         tanks.setFluid(0,fluid);
 
@@ -230,7 +224,7 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     public ModelData getModelData() {
         return ModelData.builder()
         .with(ModelProperties.FLUID_STACK, tanks.getFluid())
-        .with(ModelProperties.TANK_CAPACITY, tanks.getCapacity())
+                .with(ModelProperties.TANK_CAPACITY, TANK_CAPACITY)
         .build();
     }
 
@@ -244,6 +238,11 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     }
 
     @Override
+    public boolean shouldSyncOnUpdate() {
+        return true;
+    }
+
+    @Override
     public void load(CompoundTag tag) {
         updateTank(tag);
         lastRedstone = tag.getBoolean(TAG_REDSTONE);
@@ -254,12 +253,6 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     public void saveAdditional(CompoundTag tags) {
         super.saveAdditional(tags);
         tags.putBoolean(TAG_REDSTONE, lastRedstone);
-    }
-
-    @Nullable
-    @Override
-    public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
-        return null;
     }
 
     @Override

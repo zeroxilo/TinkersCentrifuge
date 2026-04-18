@@ -181,6 +181,7 @@ public class TinkersCentrifuge{
         MinecraftForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::addCreative);
+        modEventBus.addListener(this::registerRenderers);
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
@@ -188,14 +189,14 @@ public class TinkersCentrifuge{
         //LOGGER.info("HELLO FROM COMMON SETUP");
     }
 
+    @SuppressWarnings("removal")
     private void clientSetup(final FMLClientSetupEvent event){
         ItemBlockRenderTypes.setRenderLayer(CENTRIFUGE_BLOCK.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(ALLOY_TANK_BLOCK.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(ALLOY_GAUGE_BLOCK.get(), RenderType.cutout());
     }
-    
-    @SubscribeEvent
-    static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+
+    void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(CENTRIFUGE_ENTITY.get(), CentrifugeBlockEntityRenderer::new);
     }
 
