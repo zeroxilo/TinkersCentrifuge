@@ -21,6 +21,11 @@ public class Config
 {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
+    public static final ForgeConfigSpec.IntValue DETACH_SPEED = BUILDER
+            .comment("How many fluid will be detached in one second (Unit: mB)")
+            .defineInRange("detachSpeed", 900, 1, 2000000);
+
+    public static final ForgeConfigSpec SPEC = BUILDER.build();
     /*private static final ForgeConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
             .comment("Whether to log the dirt block on common setup")
             .define("logDirtBlock", true);

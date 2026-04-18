@@ -71,8 +71,8 @@ public class AntiAlloyRecipe implements ICustomOutputRecipe<IAntiAlloyTank>{
     public AntiAlloyRecipe(AlloyRecipe alloyRecipe,ResourceManager resourceManager) {
         //解析原配方
         Fluid alloyFluid = alloyRecipe.getOutput().getFluid();
-        int alloyAmount = alloyRecipe.getOutput().getAmount() / 10;
-        this.input = new AntiAlloyIngredient(FluidIngredient.of(new FluidStack(alloyFluid,alloyAmount)),false);
+        int alloyAmount = alloyRecipe.getOutput().getAmount();
+        this.input = new AntiAlloyIngredient(FluidIngredient.of(alloyFluid, alloyAmount), false);
         this.id = ResourceLocation.fromNamespaceAndPath("tinkerscentrifuge",alloyRecipe.getId().getPath()+"_reversed");
         this.temperature = 0;
         this.outputs = new ArrayList<FluidOutput>();
@@ -121,7 +121,7 @@ public class AntiAlloyRecipe implements ICustomOutputRecipe<IAntiAlloyTank>{
                 //将取得的流体作为输出加入到配方中
                 if(pickedFluid != null){
                     Fluid mat_fluid = pickedFluid.getFluid();
-                    int mat_amount = pickedFluid.getAmount() / 10;
+                    int mat_amount = pickedFluid.getAmount();
                     this.outputs.add(FluidOutput.fromFluid(mat_fluid,mat_amount));
                 }
             }

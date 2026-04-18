@@ -38,7 +38,6 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
     public static final int DEFAULT_CAPACITY = FluidType.BUCKET_VOLUME * 8;
     public static final int TANK_CAPACITY = FluidType.BUCKET_VOLUME * 1;
     public static final int TANK_NUM = 8;
-    public static final int PROCESS_TIME = 10;
 
     private static final Component NAME = Component.translatable("gui.centrifuge");
 
@@ -100,7 +99,7 @@ public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBloc
                             //TinkersCentrifuge.LOGGER.info("[AntiAlloy] "+recipe.getInput().getDisplayName().getString()+" Recipe Start.");
                             //TinkersCentrifuge.LOGGER.info("[AntiAlloy] Drained"+recipe.getInput().getAmount()+"mb "+recipe.getInput().getDisplayName().getString()+".");
                             currentRecipe = recipe;
-                            timer = PROCESS_TIME;//处理时间
+                            timer = (recipe.getInput().getAmount() * 20 + Config.DETACH_SPEED.get() - 1) / Config.DETACH_SPEED.get();
                             break;
                         }
                     }
