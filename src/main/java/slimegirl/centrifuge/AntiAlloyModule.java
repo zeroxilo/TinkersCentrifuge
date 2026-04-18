@@ -17,7 +17,7 @@ public class AntiAlloyModule {
     public static final List<Fluid> BLACKLIST_ALLOYS;
     public static final List<AntiAlloyRecipe> RECIPES;
     public static ResourceManager resourceManager;
-    public boolean isLoaded = false;
+    private static boolean isLoaded = false;
     public Level level;
     public MinecraftServer server;
     
@@ -25,6 +25,14 @@ public class AntiAlloyModule {
         ALL_ALLOYS = new ArrayList<Fluid>();
         BLACKLIST_ALLOYS = new ArrayList<Fluid>();
         RECIPES = new ArrayList<AntiAlloyRecipe>();
+        resourceManager = null;
+    }
+
+    public static void clearCache() {
+        ALL_ALLOYS.clear();
+        BLACKLIST_ALLOYS.clear();
+        RECIPES.clear();
+        isLoaded = false;
         resourceManager = null;
     }
 
