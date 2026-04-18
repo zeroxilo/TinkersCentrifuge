@@ -1,7 +1,6 @@
 package slimegirl.centrifuge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.List;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -10,6 +9,8 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import slimeknights.mantle.client.render.FluidCuboid;
 import slimeknights.mantle.client.render.FluidRenderer;
 import slimeknights.mantle.client.render.MantleRenderTypes;
+
+import java.util.List;
 
 public class CentrifugeBlockEntityRenderer implements BlockEntityRenderer<CentrifugeBlockEntity> {
    public CentrifugeBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

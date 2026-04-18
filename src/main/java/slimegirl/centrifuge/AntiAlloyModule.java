@@ -1,8 +1,5 @@
 package slimegirl.centrifuge;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -11,6 +8,9 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AntiAlloyModule {
     public static final List<Fluid> ALL_ALLOYS;

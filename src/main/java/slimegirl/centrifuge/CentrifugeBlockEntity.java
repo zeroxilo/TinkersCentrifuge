@@ -1,9 +1,5 @@
 package slimegirl.centrifuge;
 
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -26,13 +22,15 @@ import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.tconstruct.library.client.SafeClient;
 import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 import slimeknights.tconstruct.shared.block.entity.TableBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
-import slimeknights.tconstruct.library.client.SafeClient;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class CentrifugeBlockEntity extends TableBlockEntity implements ITankBlockEntity {
     public static final int DEFAULT_CAPACITY = FluidType.BUCKET_VOLUME * 8;

@@ -1,31 +1,11 @@
 package slimegirl.centrifuge;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.logging.Logger;
-
-import org.checkerframework.checker.units.qual.C;
-
-import com.google.gson.JsonObject;
-
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.extensions.IForgeFluid;
-import net.minecraftforge.common.extensions.IForgeItem;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -38,8 +18,11 @@ import slimeknights.mantle.recipe.ICustomOutputRecipe;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.helper.FluidOutput.Loadable;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
 //反合金配方
 //虽然写了很多交互内容，但是实际上是纯服务器事件，写这么多方便注册/调用/制作JEI显示

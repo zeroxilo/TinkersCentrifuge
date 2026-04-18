@@ -1,15 +1,15 @@
 package slimegirl.centrifuge;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
+import org.jetbrains.annotations.NotNull;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MultiFluidTank extends FluidTankAnimated{
    public @NotNull List<FluidStack> fluids;
