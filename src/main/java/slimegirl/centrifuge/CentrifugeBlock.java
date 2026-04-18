@@ -1,11 +1,11 @@
 package slimegirl.centrifuge;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -16,35 +16,18 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.level.block.state.StateDefinition.Builder;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.phys.BlockHitResult;
-import slimeknights.mantle.block.InventoryBlock;
-import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.library.utils.NBTTags;
-import slimeknights.tconstruct.smeltery.block.AbstractCastingBlock;
+import slimeknights.tconstruct.smeltery.block.component.SearedBlock;
+import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
-import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity.ITankBlock;
-import slimegirl.centrifuge.CentrifugeBlockEntity;
 
 import javax.annotation.Nullable;
 
-public class CentrifugeBlock extends InventoryBlock implements ITankBlock, EntityBlock {
-    public static final IntegerProperty LIGHT = IntegerProperty.create("light", 0, 15);
+public class CentrifugeBlock extends SearedBlock implements ITankBlock, EntityBlock {
 
     private static final VoxelShape SHAPE = Shapes.block();
     /*Shapes.join(
@@ -56,14 +39,7 @@ public class CentrifugeBlock extends InventoryBlock implements ITankBlock, Entit
         BooleanOp.ONLY_FIRST);*/
 
     public CentrifugeBlock(Properties builder) {
-        super(builder);
-        registerDefaultState(defaultBlockState().setValue(LIGHT, 0));
-    }
-
-    @Override
-    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder);
-        builder.add(LIGHT);
+        super(builder, true);
     }
 
     @Deprecated
@@ -88,7 +64,7 @@ public class CentrifugeBlock extends InventoryBlock implements ITankBlock, Entit
     public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         CompoundTag nbt = stack.getTag();
         if (nbt != null && worldIn.getBlockEntity(pos) instanceof CentrifugeBlockEntity tank) {
-            tank.updateTank(nbt.getCompound(NBTTags.TANK));
+            tank.updateTank(nbt);
         }
         super.setPlacedBy(worldIn, pos, state, placer, stack);
     }
@@ -110,7 +86,7 @@ public class CentrifugeBlock extends InventoryBlock implements ITankBlock, Entit
             tank.swap();
         }*/
     }
-    
+
     /* Comparator support */
 
     @Deprecated

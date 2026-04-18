@@ -16,7 +16,7 @@ public class JEIKluxPlugin implements IModPlugin {
     public ResourceLocation getPluginUid() {
      
            // 把ResourceLocation的第一个参数改成你自己的modid
-        return new ResourceLocation(TinkersCentrifuge.MODID, "jei_plugin");   
+        return ResourceLocation.fromNamespaceAndPath(TinkersCentrifuge.MODID, "jei_plugin");
          
     }
  

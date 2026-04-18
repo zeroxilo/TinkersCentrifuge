@@ -1,17 +1,19 @@
 package slimegirl.centrifuge;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
+import org.jetbrains.annotations.NotNull;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
-public class MultiFluidTank extends FluidTankAnimated{
+public class MultiFluidTank extends FluidTankAnimated {
    public @NotNull List<FluidStack> fluids;
    public int capacity;
 
@@ -27,10 +29,25 @@ public class MultiFluidTank extends FluidTankAnimated{
    //读取自nbt
    @Override
    public FluidTank readFromNBT(CompoundTag nbt) {
-      for(int i = 0;i < this.fluids.size();i++){
-         CompoundTag subNbt = nbt.getCompound("tank"+i);
-         if(subNbt != null){
-            this.fluids.set(i,FluidStack.loadFluidStackFromNBT(subNbt));
+      // New format
+      if (nbt.contains("tanks", Tag.TAG_LIST)) {
+         ListTag tankList = nbt.getList("tanks", Tag.TAG_COMPOUND);
+         for (int i = 0; i < this.fluids.size(); i++) {
+            if (i < tankList.size()) {
+               CompoundTag tankTag = tankList.getCompound(i);
+               this.fluids.set(i, FluidStack.loadFluidStackFromNBT(tankTag));
+            } else {
+               this.fluids.set(i, FluidStack.EMPTY);
+            }
+         }
+      } else { // Old format for backwards compatibility
+         for (int i = 0; i < this.fluids.size(); i++) {
+            String key = "tank" + i;
+            if (nbt.contains(key, Tag.TAG_COMPOUND)) {
+               this.fluids.set(i, FluidStack.loadFluidStackFromNBT(nbt.getCompound(key)));
+            } else {
+               this.fluids.set(i, FluidStack.EMPTY);
+            }
          }
       }
       return this;
@@ -39,13 +56,13 @@ public class MultiFluidTank extends FluidTankAnimated{
    //写入nbt
    @Override
    public CompoundTag writeToNBT(CompoundTag nbt) {
-      for(int i = 0;i < this.fluids.size();i++){
-         CompoundTag subNbt = new CompoundTag();
-         if(!this.fluids.get(i).isEmpty()){
-            this.fluids.get(i).writeToNBT(subNbt);
-            nbt.put("tank"+i, subNbt);
-         }
+      ListTag tankList = new ListTag();
+      for (FluidStack fluid : this.fluids) {
+         CompoundTag fluidNBT = new CompoundTag();
+         fluid.writeToNBT(fluidNBT);
+         tankList.add(fluidNBT);
       }
+      nbt.put("tanks", tankList);
       return nbt;
    }
 
@@ -65,8 +82,8 @@ public class MultiFluidTank extends FluidTankAnimated{
    @Override
    public int getTankCapacity(int arg0) {return this.capacity;}
 
-   //获取整体容量
-   public int getCapacity() {return this.capacity * this.fluids.size();}
+   //获取单个容量
+   public int getCapacity() {return this.capacity;}
 
    
    //修改整体容量
@@ -88,9 +105,9 @@ public class MultiFluidTank extends FluidTankAnimated{
    //获取容器内首个可用流体
    @Override
    public FluidStack getFluid() {
-      for(int i = 0;i< this.fluids.size();i++){
-         if (!this.fluids.isEmpty()){
-            return this.fluids.get(i);
+      for (FluidStack fluidStack : this.fluids) {
+         if (fluidStack != null && !fluidStack.isEmpty()) {
+            return fluidStack;
          }
       }
       return FluidStack.EMPTY;

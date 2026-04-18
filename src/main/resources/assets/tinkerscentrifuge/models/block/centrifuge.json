@@ -1,4 +1,11 @@
 {
+	"loader": "tconstruct:tank",
+	"parent": "block/block",
+	"fluid": {
+		"from": [0.11, 0.11, 0.11],
+		"to": [15.89, 15.89, 15.89],
+		"increments": 256
+	},
 	"format_version": "1.9.0",
 	"credit": "Made with Blockbench",
 	"textures": {

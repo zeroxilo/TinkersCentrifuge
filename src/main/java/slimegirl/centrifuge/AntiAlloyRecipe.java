@@ -1,30 +1,11 @@
 package slimegirl.centrifuge;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.logging.Logger;
-
-import org.checkerframework.checker.units.qual.C;
-
-import com.google.gson.JsonObject;
-
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.extensions.IForgeFluid;
-import net.minecraftforge.common.extensions.IForgeItem;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -37,8 +18,11 @@ import slimeknights.mantle.recipe.ICustomOutputRecipe;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.helper.FluidOutput.Loadable;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
 //反合金配方
 //虽然写了很多交互内容，但是实际上是纯服务器事件，写这么多方便注册/调用/制作JEI显示
@@ -70,49 +54,19 @@ public class AntiAlloyRecipe implements ICustomOutputRecipe<IAntiAlloyTank>{
     public AntiAlloyRecipe(AlloyRecipe alloyRecipe,ResourceManager resourceManager) {
         //解析原配方
         Fluid alloyFluid = alloyRecipe.getOutput().getFluid();
-        int alloyAmount = alloyRecipe.getOutput().getAmount() / 10;
-        this.input = new AntiAlloyIngredient(FluidIngredient.of(new FluidStack(alloyFluid,alloyAmount)),false);
-        this.id = new ResourceLocation("tinkerscentrifuge",alloyRecipe.getId().getPath()+"_reversed");
+        int alloyAmount = alloyRecipe.getOutput().getAmount();
+        this.input = new AntiAlloyIngredient(FluidIngredient.of(alloyFluid, alloyAmount), false);
+        this.id = ResourceLocation.fromNamespaceAndPath("tinkerscentrifuge",alloyRecipe.getId().getPath()+"_reversed");
         this.temperature = 0;
         this.outputs = new ArrayList<FluidOutput>();
-        //尝试根据原有配方构造输入输出
         try {
-            ResourceLocation recipePath = new ResourceLocation(
-                alloyRecipe.getId().getNamespace(),
-                "recipes/" + alloyRecipe.getId().getPath() + ".json"
-            );
-            //获取Json
-            Resource resource = AntiAlloyModule.resourceManager.getResource(recipePath).orElse(null);
-            if (resource == null){
-                TinkersCentrifuge.LOGGER.error("[AntiAlloy] Failed to find resource for recipe: " + alloyRecipe.getId());
-                return;
-            }
-            //解析配方
-            Reader reader = new InputStreamReader(resource.open());
-            JsonObject json = GsonHelper.parse(reader).getAsJsonObject();
-            reader.close();
-            if (json == null) {
-                TinkersCentrifuge.LOGGER.error("[AntiAlloy] Failed to parse JSON for recipe: " + alloyRecipe.getId());
-                return;
-            }
-            
-            //构建输出流体
-            String recipe_type = GsonHelper.getAsString(json, "type", "unknown");
-            if(recipe_type == null){
-            }else if(recipe_type.equals("tconstruct:alloy")){ //普通合金配方
-                fitToOutputs(JsonHelper.parseList(json, "inputs", FluidIngredient::deserialize));
-                TinkersCentrifuge.LOGGER.info("[AntiAlloy] Processing alloy recipe: " + alloyRecipe.getId());
-            } else if(recipe_type.equals("forge:conditional")) { //下界合金小巧思配方，目前应该没有别的用
-                if(alloyRecipe.getId().toString().equals("tconstruct:smeltery/alloys/molten_netherite")){
-                    fitToOutputs(JsonHelper.parseList(json.get("recipes").getAsJsonArray().get(0).getAsJsonObject().get("recipe").getAsJsonObject(), "inputs", FluidIngredient::deserialize));
-                    TinkersCentrifuge.LOGGER.info("[AntiAlloy] Processing alloy recipe: " + alloyRecipe.getId());
-                }else{
-                    TinkersCentrifuge.LOGGER.info("[AntiAlloy] Unknown Conditional Recipe: " + alloyRecipe.getId());
-                }
-            }else{
-                TinkersCentrifuge.LOGGER.warn("[AntiAlloy] Unsupported Type Recipe: " + alloyRecipe.getId());
-            }
-            /* */
+            List<FluidIngredient> fluidIngredientList = alloyRecipe
+                    .getInputs()
+                    .stream()
+                    .filter(Predicate.not(AlloyRecipe.AlloyIngredient::catalyst))
+                    .map(AlloyRecipe.AlloyIngredient::fluid)
+                    .toList();
+            fitToOutputs(fluidIngredientList);
         } catch (Exception e) {
             TinkersCentrifuge.LOGGER.error("[AntiAlloy] Failed to load recipe from " + alloyRecipe.getId(), e);
         }
@@ -150,7 +104,7 @@ public class AntiAlloyRecipe implements ICustomOutputRecipe<IAntiAlloyTank>{
                 //将取得的流体作为输出加入到配方中
                 if(pickedFluid != null){
                     Fluid mat_fluid = pickedFluid.getFluid();
-                    int mat_amount = pickedFluid.getAmount() / 10;
+                    int mat_amount = pickedFluid.getAmount();
                     this.outputs.add(FluidOutput.fromFluid(mat_fluid,mat_amount));
                 }
             }

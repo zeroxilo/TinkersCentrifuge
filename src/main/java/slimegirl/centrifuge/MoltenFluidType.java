@@ -1,21 +1,18 @@
 package slimegirl.centrifuge;
 
-import java.util.function.Consumer;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.joml.Vector3f;
-
 import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidType;
+import org.joml.Vector3f;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.function.Consumer;
 
 public class MoltenFluidType extends FluidType {
     private final ResourceLocation stillTexture;
@@ -28,9 +25,9 @@ public class MoltenFluidType extends FluidType {
 
     public MoltenFluidType(String name,final Properties properties) {
         this(
-            new ResourceLocation(TinkersCentrifuge.MODID, "fluid/" + name + "_still"),
-            new ResourceLocation(TinkersCentrifuge.MODID, "fluid/" + name + "_flowing"),
-            new ResourceLocation(TinkersCentrifuge.MODID, "fluid/" + name + "_overlay"),
+            ResourceLocation.fromNamespaceAndPath(TinkersCentrifuge.MODID, "fluid/" + name + "_still"),
+            ResourceLocation.fromNamespaceAndPath(TinkersCentrifuge.MODID, "fluid/" + name + "_flowing"),
+            ResourceLocation.fromNamespaceAndPath(TinkersCentrifuge.MODID, "fluid/" + name + "_overlay"),
             -1,
             new Vector3f(1.0f, 1.0f, 1.0f),
             properties
