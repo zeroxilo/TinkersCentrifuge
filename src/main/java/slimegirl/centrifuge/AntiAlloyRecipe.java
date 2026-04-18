@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import org.checkerframework.checker.units.qual.C;
@@ -75,44 +76,14 @@ public class AntiAlloyRecipe implements ICustomOutputRecipe<IAntiAlloyTank>{
         this.id = ResourceLocation.fromNamespaceAndPath("tinkerscentrifuge",alloyRecipe.getId().getPath()+"_reversed");
         this.temperature = 0;
         this.outputs = new ArrayList<FluidOutput>();
-        //尝试根据原有配方构造输入输出
         try {
-            ResourceLocation recipePath = ResourceLocation.fromNamespaceAndPath(
-                alloyRecipe.getId().getNamespace(),
-                "recipes/" + alloyRecipe.getId().getPath() + ".json"
-            );
-            //获取Json
-            Resource resource = AntiAlloyModule.resourceManager.getResource(recipePath).orElse(null);
-            if (resource == null){
-                TinkersCentrifuge.LOGGER.error("[AntiAlloy] Failed to find resource for recipe: " + alloyRecipe.getId());
-                return;
-            }
-            //解析配方
-            Reader reader = new InputStreamReader(resource.open());
-            JsonObject json = GsonHelper.parse(reader).getAsJsonObject();
-            reader.close();
-            if (json == null) {
-                TinkersCentrifuge.LOGGER.error("[AntiAlloy] Failed to parse JSON for recipe: " + alloyRecipe.getId());
-                return;
-            }
-            
-            //构建输出流体
-            String recipe_type = GsonHelper.getAsString(json, "type", "unknown");
-            if(recipe_type == null){
-            }else if(recipe_type.equals("tconstruct:alloy")){ //普通合金配方
-                fitToOutputs(JsonHelper.parseList(json, "inputs", FluidIngredient::deserialize));
-                TinkersCentrifuge.LOGGER.info("[AntiAlloy] Processing alloy recipe: " + alloyRecipe.getId());
-            } else if(recipe_type.equals("forge:conditional")) { //下界合金小巧思配方，目前应该没有别的用
-                if(alloyRecipe.getId().toString().equals("tconstruct:smeltery/alloys/molten_netherite")){
-                    fitToOutputs(JsonHelper.parseList(json.get("recipes").getAsJsonArray().get(0).getAsJsonObject().get("recipe").getAsJsonObject(), "inputs", FluidIngredient::deserialize));
-                    TinkersCentrifuge.LOGGER.info("[AntiAlloy] Processing alloy recipe: " + alloyRecipe.getId());
-                }else{
-                    TinkersCentrifuge.LOGGER.info("[AntiAlloy] Unknown Conditional Recipe: " + alloyRecipe.getId());
-                }
-            }else{
-                TinkersCentrifuge.LOGGER.warn("[AntiAlloy] Unsupported Type Recipe: " + alloyRecipe.getId());
-            }
-            /* */
+            List<FluidIngredient> fluidIngredientList = alloyRecipe
+                    .getInputs()
+                    .stream()
+                    .filter(Predicate.not(AlloyRecipe.AlloyIngredient::catalyst))
+                    .map(AlloyRecipe.AlloyIngredient::fluid)
+                    .toList();
+            fitToOutputs(fluidIngredientList);
         } catch (Exception e) {
             TinkersCentrifuge.LOGGER.error("[AntiAlloy] Failed to load recipe from " + alloyRecipe.getId(), e);
         }
