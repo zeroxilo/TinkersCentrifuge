@@ -19,9 +19,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import slimeknights.tconstruct.library.utils.NBTTags;
 import slimeknights.tconstruct.smeltery.block.component.SearedBlock;
-import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity.ITankBlock;
 
@@ -110,6 +108,6 @@ public class CentrifugeBlock extends SearedBlock implements ITankBlock, EntityBl
 
     @Override
     public int getCapacity() {
-        return CentrifugeBlockEntity.DEFAULT_CAPACITY;
+        return CentrifugeBlockEntity.CAPACITY;
     }
 }
