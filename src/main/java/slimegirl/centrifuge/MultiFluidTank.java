@@ -58,19 +58,11 @@ public class MultiFluidTank extends FluidTankAnimated {
    @Override
    public FluidTank readFromNBT(CompoundTag nbt) {
       clearFluids();
-      // New format
       if (nbt.contains("tanks", Tag.TAG_LIST)) {
          ListTag tankList = nbt.getList("tanks", Tag.TAG_COMPOUND);
          for (int i = 0; i < tankList.size(); i++) {
             CompoundTag tankTag = tankList.getCompound(i);
             addFluid(FluidStack.loadFluidStackFromNBT(tankTag));
-         }
-      } else { // Old format for backwards compatibility
-         int i = 0;
-         while (nbt.contains("tank" + i, Tag.TAG_COMPOUND)) {
-            CompoundTag tankTag = nbt.getCompound("tank" + i);
-            addFluid(FluidStack.loadFluidStackFromNBT(tankTag));
-            i++;
          }
       }
       sort();

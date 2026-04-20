@@ -260,16 +260,22 @@ public class CentrifugeBlockEntity extends MantleBlockEntity implements ITankBlo
     public void updateTank(CompoundTag nbt) {
         if (nbt.contains("tanks", Tag.TAG_LIST)) {
             tanks.readFromNBT(nbt);
-        } else if (nbt.getCompound(NBTTags.TANK).isEmpty()) {
-            tanks.setFluid(FluidStack.EMPTY);
+        } else if (nbt.contains(NBTTags.TANK, Tag.TAG_COMPOUND)) {
+            updateFluidTo(FluidStack.loadFluidStackFromNBT(nbt.getCompound(NBTTags.TANK)));
         } else {
-            if (nbt.contains(NBTTags.TANK, Tag.TAG_COMPOUND)) {
-                updateFluidTo(FluidStack.loadFluidStackFromNBT(nbt.getCompound(NBTTags.TANK)));
+            // Old format for backwards compatibility
+            int i = 0;
+            if (nbt.contains("tank" + i, Tag.TAG_COMPOUND)) {
+                while (nbt.contains("tank" + i, Tag.TAG_COMPOUND)) {
+                    CompoundTag tankTag = nbt.getCompound("tank" + i);
+                    tanks.addFluid(FluidStack.loadFluidStackFromNBT(tankTag));
+                    i++;
+                }
             } else {
                 tanks.setFluid(FluidStack.EMPTY);
             }
-            //CentrifugeBlockEntity.updateLight(this, tank);
         }
+        //CentrifugeBlockEntity.updateLight(this, tank);
     }
 
     //保存同步数据，客户端加载时会调用load方法
