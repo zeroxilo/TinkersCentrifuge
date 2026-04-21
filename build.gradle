@@ -142,6 +142,11 @@ dependencies {
     modImplementation "slimeknights.tconstruct:TConstruct:${minecraft_version}-${tinker_version}"
     modImplementation "slimeknights.mantle:Mantle:${minecraft_version}-${mantle_version}"
     modImplementation "mezz.jei:jei-${minecraft_version}-forge:${jei_version}"
+    modLocalRuntime "curse.maven:jade-324717:6855440"
+    modLocalRuntime "curse.maven:jade-addons-583345:6274674"
+    modLocalRuntime "curse.maven:pipez-443900:4916633"
+
+    modLocalRuntime "curse.maven:just-enough-characters-250702:7411324"
 }
 
 // Uncomment the lines below if you wish to configure mixin. The mixin file should be named modid.mixins.json.
