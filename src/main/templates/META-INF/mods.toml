@@ -26,3 +26,9 @@ mandatory = true
 versionRange = "[${tinker_version},)"
 ordering = "AFTER"
 side = "BOTH"
+[[dependencies.${mod_id}]]
+modId = "mantle"
+mandatory = true
+versionRange = "[${mantle_version},)"
+ordering = "AFTER"
+side = "BOTH"
