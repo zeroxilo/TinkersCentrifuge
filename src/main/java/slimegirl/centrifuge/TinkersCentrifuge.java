@@ -36,8 +36,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.mantle.registration.deferred.BlockEntityTypeDeferredRegister;
 import slimeknights.mantle.registration.deferred.SynchronizedDeferredRegister;
-import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
+import slimeknights.tconstruct.smeltery.client.render.TankBlockEntityRenderer;
 import slimeknights.tconstruct.smeltery.item.TankItem;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -46,7 +47,7 @@ public class TinkersCentrifuge{
     public static final String MODID = "tinkerscentrifuge";
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
+    public static final BlockEntityTypeDeferredRegister BLOCK_ENTITIES = new BlockEntityTypeDeferredRegister(MODID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(ForgeRegistries.FLUIDS, MODID);
@@ -77,8 +78,7 @@ public class TinkersCentrifuge{
         () -> new TankItem(CENTRIFUGE_BLOCK.get(), new Item.Properties(),true)
     );
     public static final RegistryObject<BlockEntityType<CentrifugeBlockEntity>> CENTRIFUGE_ENTITY = BLOCK_ENTITIES.register(
-        "centrifuge_entity",
-        () -> BlockEntityType.Builder.of(CentrifugeBlockEntity::new, CENTRIFUGE_BLOCK.get()).build(null)
+            "centrifuge_entity", CentrifugeBlockEntity::new, CENTRIFUGE_BLOCK
     );
     //离心配方注册
     public static final RegistryObject<RecipeSerializer<AntiAlloyRecipe>> antiAlloyingSerializer  = RECIPE_SERIALIZERS.register("anti_alloy", () -> LoadableRecipeSerializer.of(AntiAlloyRecipe.LOADER));
@@ -95,7 +95,7 @@ public class TinkersCentrifuge{
     //合金储罐注册
     public static final RegistryObject<Block> ALLOY_TANK_BLOCK = BLOCKS.register(
         "alloy_tank",
-        () -> new SearedTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f),7290,PushReaction.DESTROY)
+            () -> new AlloyTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f), 7290, PushReaction.DESTROY)
     );
     public static final RegistryObject<Item> ALLOY_TANK_BLOCK_ITEM = ITEMS.register(
         "alloy_tank",
@@ -105,12 +105,18 @@ public class TinkersCentrifuge{
     //合金量器注册
     public static final RegistryObject<Block> ALLOY_GAUGE_BLOCK = BLOCKS.register(
         "alloy_gauge",
-        () -> new SearedTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f),7290,PushReaction.DESTROY)
+            () -> new AlloyTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f), 7290, PushReaction.DESTROY)
     );
     public static final RegistryObject<Item> ALLOY_GAUGE_BLOCK_ITEM = ITEMS.register(
         "alloy_gauge",
         () -> new TankItem(ALLOY_GAUGE_BLOCK.get(), ITEM_PROPS, true)
     );
+
+
+    public static final RegistryObject<BlockEntityType<AlloyTankBE>> TANK_BLOCK_ENTITY = BLOCK_ENTITIES.register("tank", AlloyTankBE::new, set -> {
+        set.add(ALLOY_TANK_BLOCK.get());
+        set.add(ALLOY_GAUGE_BLOCK.get());
+    });
     //月季铁注册
     public static final RegistryObject<Block> ROSA_IRON_BLOCK = BLOCKS.register(
         "rosa_iron_block",
@@ -198,6 +204,7 @@ public class TinkersCentrifuge{
 
     void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(CENTRIFUGE_ENTITY.get(), CentrifugeBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(TANK_BLOCK_ENTITY.get(), TankBlockEntityRenderer::new);
     }
 
     // 将离心机添加进创造模式物品栏
