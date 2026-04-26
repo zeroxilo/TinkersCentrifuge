@@ -95,7 +95,7 @@ public class TinkersCentrifuge{
     //合金储罐注册
     public static final RegistryObject<Block> ALLOY_TANK_BLOCK = BLOCKS.register(
         "alloy_tank",
-            () -> new AlloyTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f), 7290, PushReaction.DESTROY)
+            () -> new AlloyTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f), PushReaction.DESTROY)
     );
     public static final RegistryObject<Item> ALLOY_TANK_BLOCK_ITEM = ITEMS.register(
         "alloy_tank",
@@ -105,7 +105,7 @@ public class TinkersCentrifuge{
     //合金量器注册
     public static final RegistryObject<Block> ALLOY_GAUGE_BLOCK = BLOCKS.register(
         "alloy_gauge",
-            () -> new AlloyTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f), 7290, PushReaction.DESTROY)
+            () -> new AlloyTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f), PushReaction.DESTROY)
     );
     public static final RegistryObject<Item> ALLOY_GAUGE_BLOCK_ITEM = ITEMS.register(
         "alloy_gauge",
