@@ -3,44 +3,31 @@ package slimegirl.centrifuge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.mantle.util.BlockEntityHelper;
-import slimeknights.tconstruct.library.client.SafeClient;
-import slimeknights.tconstruct.library.client.model.ModelProperties;
-import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 import slimeknights.tconstruct.library.recipe.FluidValues;
-import slimeknights.tconstruct.library.utils.NBTTags;
-import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CentrifugeBlockEntity extends MantleBlockEntity implements ITankBlockEntity {
+public class CentrifugeBlockEntity extends MultiFluidTankBlockEntify {
     public static final int CAPACITY = FluidValues.INGOT * 48;
-
     protected final AntiAlloyModule antiAlloyModule;
     protected AntiAlloyRecipe currentRecipe;
     protected int timer = 0;
-    protected GraduallyTimer pushOutTimer = new GraduallyTimer();
-    protected final MultiFluidTank tanks;
-    private final LazyOptional<IFluidHandler> fluidHolder;
+    protected Util.GraduallyTimer pushOutTimer = new Util.GraduallyTimer();
+
+
     /** Last redstone state of the block */
     private boolean lastRedstone = false;
     /** Last comparator strength to reduce block updates */
@@ -55,17 +42,11 @@ public class CentrifugeBlockEntity extends MantleBlockEntity implements ITankBlo
     
 
     public CentrifugeBlockEntity(BlockPos pos, BlockState state) {
-        this(TinkersCentrifuge.CENTRIFUGE_ENTITY.get(), pos, state);
+        super(TinkersCentrifuge.CENTRIFUGE_ENTITY.get(), pos, state, CAPACITY, false);
+        antiAlloyModule = new AntiAlloyModule(this.getLevel());
     }
 
-    /* 内容初始化 */
-    @SuppressWarnings("WeakerAccess")
-    protected CentrifugeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-        super(type, pos, state);
-        antiAlloyModule = new AntiAlloyModule(this.getLevel());
-        tanks = new MultiFluidTank(CAPACITY, this);
-        fluidHolder = LazyOptional.of(() -> tanks);
-    }
+
 
     @Nullable
     public static <CAST extends CentrifugeBlockEntity, RET extends BlockEntity> BlockEntityTicker<RET> getTicker(Level level, BlockEntityType<RET> check, BlockEntityType<CAST> casting) {
@@ -74,10 +55,6 @@ public class CentrifugeBlockEntity extends MantleBlockEntity implements ITankBlo
 
     /* 客户端每帧事件 */
     private void clientTick(Level level, BlockPos pos) {
-    }
-
-    public static int getCapacity(Block block) {
-        return CAPACITY;
     }
 
     @Nullable
@@ -140,9 +117,9 @@ public class CentrifugeBlockEntity extends MantleBlockEntity implements ITankBlo
         List<FluidStack> outputs = currentRecipe.getOutputs();
         for (FluidStack output : outputs) {
             if (output.isEmpty()) continue;
-            int filled = tanks.fill(output, FluidAction.SIMULATE);
+            int filled = tanks.fill2(output, FluidAction.SIMULATE);
             if (filled > 0) {
-                tanks.fill(output, FluidAction.EXECUTE);
+                tanks.fill2(output, FluidAction.EXECUTE);
             }
             //TinkersCentrifuge.LOGGER.info("[AntiAlloy] Filled "+filled+"mb "+output.getDisplayName().getString());
             //已经做足了容量检查，如果还是溢出了，那真没办法了，你浪费吧。
@@ -207,41 +184,7 @@ public class CentrifugeBlockEntity extends MantleBlockEntity implements ITankBlo
         return Math.max(total_power,15);
     }
     
-    @Override
-    public void updateFluidTo(FluidStack fluid) {
-        // update tank fluid
-        int oldAmount = tanks.getFluidAmount();
-        int index = tanks.findTankIndex(fluid.getFluid());
 
-        // 修复：不要清空整个容器，只增加流体或修改指定槽位
-        if (index == -1) {
-            if (!fluid.isEmpty()) {
-                tanks.addFluid(fluid);
-            }
-        } else {
-            tanks.setFluid(index, fluid);
-        }
-        tanks.sort();
-
-        int newAmount = tanks.getFluidAmount();
-
-        // update the tank render offset from the change
-        tanks.setRenderOffset(tanks.getRenderOffset() + newAmount - oldAmount);
-
-        // update the block model
-        if (isFluidInModel()) {
-            SafeClient.updateFluidModel(getTE(), tanks, oldAmount, newAmount);
-        }
-    }
-
-    @Override
-    @Nonnull
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
-        if (capability == ForgeCapabilities.FLUID_HANDLER) {
-            return fluidHolder.cast();
-        }
-        return super.getCapability(capability, facing);
-    }
 
     //寻找流体容器
     private LazyOptional<IFluidHandler> findFluidHandler(Direction side) {
@@ -256,73 +199,11 @@ public class CentrifugeBlockEntity extends MantleBlockEntity implements ITankBlo
         return LazyOptional.empty();
     }
 
-    //从nbt数据中获取流体信息并更新
-    public void updateTank(CompoundTag nbt) {
-        if (nbt.contains("tanks", Tag.TAG_LIST)) {
-            tanks.readFromNBT(nbt);
-        } else if (nbt.contains(NBTTags.TANK, Tag.TAG_COMPOUND)) {
-            updateFluidTo(FluidStack.loadFluidStackFromNBT(nbt.getCompound(NBTTags.TANK)));
-        } else {
-            // Old format for backwards compatibility
-            int i = 0;
-            if (nbt.contains("tank" + i, Tag.TAG_COMPOUND)) {
-                while (nbt.contains("tank" + i, Tag.TAG_COMPOUND)) {
-                    CompoundTag tankTag = nbt.getCompound("tank" + i);
-                    tanks.addFluid(FluidStack.loadFluidStackFromNBT(tankTag));
-                    i++;
-                }
-            } else {
-                tanks.setFluid(FluidStack.EMPTY);
-            }
-        }
-        //CentrifugeBlockEntity.updateLight(this, tank);
-    }
-
-    //保存同步数据，客户端加载时会调用load方法
-    @Override
-    public void saveSynced(CompoundTag tag) {
-        super.saveSynced(tag);
-        tanks.writeToNBT(tag);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        fluidHolder.invalidate();
-    }
-
-    @Nonnull
-    @Override
-    public ModelData getModelData() {
-        return ModelData.builder()
-                .with(ModelProperties.FLUID_STACK, new FluidStack(tanks.getFluid(), tanks.getFluidAmount()))
-                .with(ModelProperties.TANK_CAPACITY, CAPACITY)
-        .build();
-    }
-
-    @Override
-    public void onTankContentsChanged() {
-        ITankBlockEntity.super.onTankContentsChanged();
-        this.setChanged();
-        // 放弃原版匠魂的单流体同步策略，改为更新完整 NBT 发往客户端。
-        if (this.level != null) {
-            if (!this.level.isClientSide) {
-                this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Block.UPDATE_ALL);
-            }
-            this.requestModelDataUpdate();
-        }
-    }
-
-    @Override
-    public boolean shouldSyncOnUpdate() {
-        return true;
-    }
 
     @Override
     public void load(CompoundTag tag) {
-        updateTank(tag);
-        lastRedstone = tag.getBoolean(TAG_REDSTONE);
         super.load(tag);
+        lastRedstone = tag.getBoolean(TAG_REDSTONE);
     }
 
     @Override
@@ -331,62 +212,5 @@ public class CentrifugeBlockEntity extends MantleBlockEntity implements ITankBlo
         tags.putBoolean(TAG_REDSTONE, lastRedstone);
     }
 
-    @Override
-    public FluidTankAnimated getTank() {
-        return tanks;
-    }
 
-
-    public class GraduallyTimer {
-        private final int maxTicks;
-        private final int perTicksOnFail;
-        private int ticks = 0;
-        private int currentMaxTicks = 0;
-
-        public GraduallyTimer(int maxTicks, int perTicksOnFail) {
-            this.maxTicks = maxTicks;
-            this.perTicksOnFail = perTicksOnFail;
-        }
-
-        public GraduallyTimer(int maxTicks) {
-            this.maxTicks = maxTicks;
-            this.perTicksOnFail = 5;
-        }
-
-        public GraduallyTimer() {
-            this.maxTicks = 20;
-            this.perTicksOnFail = 5;
-        }
-
-        public boolean tick() {
-            if (ticks < currentMaxTicks) {
-                ticks++;
-            } else {
-                return true;
-            }
-            return false;
-        }
-
-        public void reset(boolean success) {
-            ticks = 0;
-            if (success) {
-                currentMaxTicks = 0;
-            } else {
-                if (currentMaxTicks != maxTicks) {
-                    currentMaxTicks += perTicksOnFail;
-                    if (currentMaxTicks > maxTicks) {
-                        currentMaxTicks = maxTicks;
-                    }
-                }
-            }
-        }
-
-        public void reset(Callable<Boolean> task) {
-            try {
-                reset(task.call());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
 }

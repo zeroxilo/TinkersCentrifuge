@@ -115,7 +115,6 @@ public class MultiFluidTank extends FluidTankAnimated {
    //获取容量
    public int getCapacity() {return this.capacity;}
 
-   
    //修改整体容量
    public MultiFluidTank setCapacity(int capacity) {
       this.capacity = capacity;
@@ -155,9 +154,13 @@ public class MultiFluidTank extends FluidTankAnimated {
       return -1;
    }
 
-   //尝试填入流体
    @Override
-   public int fill(@NotNull FluidStack fluidStack, FluidAction action) {
+   public int fill(FluidStack resource, FluidAction action) {
+      return fill2(resource, action);
+   }
+
+   //尝试填入流体
+   public int fill2(@NotNull FluidStack fluidStack, FluidAction action) {
       if (fluidStack.isEmpty()) {
          return 0;
       }
