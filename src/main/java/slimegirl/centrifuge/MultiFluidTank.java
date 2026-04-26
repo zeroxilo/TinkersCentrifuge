@@ -6,16 +6,16 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
-import org.jetbrains.annotations.NotNull;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MultiFluidTank extends FluidTankAnimated {
-   private final @NotNull List<FluidStack> fluids;
+   private final @Nonnull List<FluidStack> fluids;
    public int capacity;
 
    public MultiFluidTank(int capacity, MantleBlockEntity parent) {
@@ -34,7 +34,7 @@ public class MultiFluidTank extends FluidTankAnimated {
       return this.fluids.size();
    }
 
-   public @NotNull List<FluidStack> getFluids() {
+   public @Nonnull List<FluidStack> getFluids() {
       return fluids;
    }
 
@@ -89,7 +89,7 @@ public class MultiFluidTank extends FluidTankAnimated {
    }
 
    //获取容器内流体
-   @NotNull
+   @Nonnull
    @Override
    public FluidStack getFluidInTank(int index) {
       if (index < 0 || index >= this.fluids.size()) {
@@ -122,7 +122,7 @@ public class MultiFluidTank extends FluidTankAnimated {
    }
 
    //获取容器内首个可用流体
-   @NotNull
+   @Nonnull
    @Override
    public FluidStack getFluid() {
       for (FluidStack fluidStack : this.fluids) {
@@ -160,7 +160,7 @@ public class MultiFluidTank extends FluidTankAnimated {
    }
 
    //尝试填入流体
-   public int fill2(@NotNull FluidStack fluidStack, FluidAction action) {
+   public int fill2(@Nonnull FluidStack fluidStack, FluidAction action) {
       if (fluidStack.isEmpty()) {
          return 0;
       }
@@ -200,7 +200,7 @@ public class MultiFluidTank extends FluidTankAnimated {
    }
 
    //提取特定流体
-   @NotNull
+   @Nonnull
    @Override
    public FluidStack drain(FluidStack resource, FluidAction action) {
       int index = findTankIndex(resource.getFluid());
@@ -209,7 +209,7 @@ public class MultiFluidTank extends FluidTankAnimated {
    }
    
    //按流量提取
-   @NotNull
+   @Nonnull
    @Override
    public FluidStack drain(int maxAmount, FluidAction action) {
       for (int i = 0; i < getSize(); i++) {
@@ -221,7 +221,7 @@ public class MultiFluidTank extends FluidTankAnimated {
    }
 
    //尝试从特定槽位提取流体
-   @NotNull
+   @Nonnull
    public FluidStack drainFrom(int index,int maxAmount, FluidAction action) {
       if (this.getFluid(index).isEmpty() || maxAmount == 0) return FluidStack.EMPTY;
       FluidStack fluidHere = this.getFluid(index);
@@ -245,12 +245,12 @@ public class MultiFluidTank extends FluidTankAnimated {
    }
 
    //检查给定流体是否可加入任意位置，不检查容量
-   public boolean isFluidValid(@NotNull FluidStack fluidStack) {
+   public boolean isFluidValid(@Nonnull FluidStack fluidStack) {
       return true;
    }
 
    //检查给定流体是否可加入指定位置，不检查容量
-   public boolean isFluidValid(int index, @NotNull FluidStack fluidStack) {
+   public boolean isFluidValid(int index, @Nonnull FluidStack fluidStack) {
       //每个容器只能存储不同类型的流体
       Fluid fluid = fluidStack.getFluid();
       for (int i = 0; i < getSize(); i++) {
