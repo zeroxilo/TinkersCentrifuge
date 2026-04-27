@@ -146,12 +146,14 @@ dependencies {
     modLocalRuntime "curse.maven:jade-addons-583345:6274674"
     modLocalRuntime "curse.maven:pipez-443900:4916633"
     modLocalRuntime "curse.maven:mekanism-268560:6552911"
+    modLocalRuntime "curse.maven:create-328085:7178761"
+    modLocalRuntime "curse.maven:clientsort-1049891:7441868"
 
     modLocalRuntime "curse.maven:just-enough-characters-250702:7411324"
 }
 
 // Uncomment the lines below if you wish to configure mixin. The mixin file should be named modid.mixins.json.
-/*
+
 mixin {
     add sourceSets.main, "${mod_id}.refmap.json"
     config "${mod_id}.mixins.json"
@@ -166,7 +168,7 @@ jar {
             "MixinConfigs": "${mod_id}.mixins.json"
     ])
 }
-*/
+
 
 // This block of code expands all declared replace properties in the specified resource targets.
 // A missing property will result in an error. Properties are expanded using ${} Groovy notation.
