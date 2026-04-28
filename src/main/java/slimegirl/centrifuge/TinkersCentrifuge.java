@@ -1,8 +1,6 @@
 package slimegirl.centrifuge;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -16,11 +14,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraft.world.level.material.PushReaction;
-import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.SoundActions;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -28,7 +24,6 @@ import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
@@ -38,8 +33,6 @@ import org.slf4j.Logger;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.mantle.registration.deferred.BlockEntityTypeDeferredRegister;
 import slimeknights.mantle.registration.deferred.SynchronizedDeferredRegister;
-import slimeknights.tconstruct.smeltery.client.render.TankBlockEntityRenderer;
-import slimeknights.tconstruct.smeltery.item.TankItem;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(TinkersCentrifuge.MODID)
@@ -54,16 +47,17 @@ public class TinkersCentrifuge{
     public static final DeferredRegister<FluidType> FLUID_TYPES = DeferredRegister.create(ForgeRegistries.Keys.FLUID_TYPES, MODID);
     public static final SynchronizedDeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = SynchronizedDeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MODID);
     private static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, MODID);
+    public static final DeferredRegister<LootItemFunctionType> LOOT_FUNCTIONS =
+            DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, MODID);
+
+    public static final RegistryObject<LootItemFunctionType> CENTRIFUGE_NBT_FUNCTION =
+            LOOT_FUNCTIONS.register("split_centrifuge_tanks",
+                    () -> new LootItemFunctionType(new CentrifugeNbtFunction.CentrifugeSerializer()));
+
 
     protected static final Item.Properties ITEM_PROPS = new Item.Properties();
     
-    //创造模式物品栏
-    public static final RegistryObject<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("tinkerscentrifuge_tab", () ->
-        CreativeModeTab.builder()
-            .icon(() -> new ItemStack(TinkersCentrifuge.CENTRIFUGE_BLOCK_ITEM.get()))
-            .title(Component.translatable("tab.tinkerscentrifuge"))
-            .build()
-    );
+
 
     //离心机注册
     public static final RegistryObject<CentrifugeBlock> CENTRIFUGE_BLOCK = BLOCKS.register(
@@ -73,15 +67,15 @@ public class TinkersCentrifuge{
             .requiresCorrectToolForDrops()
         )
     );
-    public static final RegistryObject<BlockItem> CENTRIFUGE_BLOCK_ITEM = ITEMS.register(
+    public static final RegistryObject<MultiFluidTankItem> CENTRIFUGE_BLOCK_ITEM = ITEMS.register(
         "centrifuge",
-        () -> new TankItem(CENTRIFUGE_BLOCK.get(), new Item.Properties(),true)
+            () -> new MultiFluidTankItem(CENTRIFUGE_BLOCK.get(), new Item.Properties(), true)
     );
     public static final RegistryObject<BlockEntityType<CentrifugeBlockEntity>> CENTRIFUGE_ENTITY = BLOCK_ENTITIES.register(
             "centrifuge_entity", CentrifugeBlockEntity::new, CENTRIFUGE_BLOCK
     );
     //离心配方注册
-    public static final RegistryObject<RecipeSerializer<AntiAlloyRecipe>> antiAlloyingSerializer  = RECIPE_SERIALIZERS.register("anti_alloy", () -> LoadableRecipeSerializer.of(AntiAlloyRecipe.LOADER));
+    public static final RegistryObject<RecipeSerializer<AntiAlloyRecipe>> ANTI_ALLOYING_SERIALIZER = RECIPE_SERIALIZERS.register("anti_alloy", () -> LoadableRecipeSerializer.of(AntiAlloyRecipe.LOADER));
     public static final RegistryObject<RecipeType<AntiAlloyRecipe>> ANTI_ALLOYING = RECIPE_TYPES.register(
         "anti_alloy",
         () -> new RecipeType<AntiAlloyRecipe>() {
@@ -93,27 +87,27 @@ public class TinkersCentrifuge{
     );
 
     //合金储罐注册
-    public static final RegistryObject<Block> ALLOY_TANK_BLOCK = BLOCKS.register(
+    public static final RegistryObject<AlloyTankBlock> ALLOY_TANK_BLOCK = BLOCKS.register(
         "alloy_tank",
-            () -> new AlloyTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f), PushReaction.DESTROY)
+            () -> new AlloyTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f))
     );
-    public static final RegistryObject<Item> ALLOY_TANK_BLOCK_ITEM = ITEMS.register(
+    public static final RegistryObject<MultiFluidTankItem> ALLOY_TANK_BLOCK_ITEM = ITEMS.register(
         "alloy_tank",
-        () -> new TankItem(ALLOY_TANK_BLOCK.get(), ITEM_PROPS, true)
+            () -> new MultiFluidTankItem(ALLOY_TANK_BLOCK.get(), ITEM_PROPS, true)
     );
 
     //合金量器注册
-    public static final RegistryObject<Block> ALLOY_GAUGE_BLOCK = BLOCKS.register(
+    public static final RegistryObject<AlloyTankBlock> ALLOY_GAUGE_BLOCK = BLOCKS.register(
         "alloy_gauge",
-            () -> new AlloyTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f), PushReaction.DESTROY)
+            () -> new AlloyTankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).noOcclusion().strength(5.0f, 6.0f))
     );
-    public static final RegistryObject<Item> ALLOY_GAUGE_BLOCK_ITEM = ITEMS.register(
+    public static final RegistryObject<MultiFluidTankItem> ALLOY_GAUGE_BLOCK_ITEM = ITEMS.register(
         "alloy_gauge",
-        () -> new TankItem(ALLOY_GAUGE_BLOCK.get(), ITEM_PROPS, true)
+            () -> new MultiFluidTankItem(ALLOY_GAUGE_BLOCK.get(), ITEM_PROPS, true)
     );
 
 
-    public static final RegistryObject<BlockEntityType<AlloyTankBE>> TANK_BLOCK_ENTITY = BLOCK_ENTITIES.register("tank", AlloyTankBE::new, set -> {
+    public static final RegistryObject<BlockEntityType<AlloyTankBlockEntity>> TANK_BLOCK_ENTITY = BLOCK_ENTITIES.register("tank", AlloyTankBlockEntity::new, set -> {
         set.add(ALLOY_TANK_BLOCK.get());
         set.add(ALLOY_GAUGE_BLOCK.get());
     });
@@ -173,6 +167,23 @@ public class TinkersCentrifuge{
         () -> new LiquidBlock(MOLTEN_ROSA_IRON, BlockBehaviour.Properties.of().noLootTable())
     );
 
+    //创造模式物品栏
+    public static final RegistryObject<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("tinkerscentrifuge_tab", () ->
+            CreativeModeTab.builder()
+                    .icon(() -> new ItemStack(TinkersCentrifuge.CENTRIFUGE_BLOCK_ITEM.get()))
+                    .title(Component.translatable("tab.tinkerscentrifuge"))
+                    .displayItems((parameters, output) -> {
+                        output.accept(ROSA_IRON_NUGGET.get());
+                        output.accept(ROSA_IRON_INGOT.get());
+                        output.accept(ROSA_IRON_BLOCK_ITEM.get());
+                        output.accept(MOLTEN_ROSA_IRON_BUCKET.get());
+                        output.accept(CENTRIFUGE_BLOCK_ITEM.get());
+                        output.accept(ALLOY_TANK_BLOCK_ITEM.get());
+                        output.accept(ALLOY_GAUGE_BLOCK_ITEM.get());
+                    })
+                    .build()
+    );
+
     public TinkersCentrifuge(FMLJavaModLoadingContext context){
         IEventBus modEventBus = context.getModEventBus();
         modEventBus.addListener(this::commonSetup);
@@ -184,40 +195,13 @@ public class TinkersCentrifuge{
         BLOCK_ENTITIES.register(modEventBus);
         RECIPE_SERIALIZERS.register(modEventBus);
         RECIPE_TYPES.register(modEventBus);
+        LOOT_FUNCTIONS.register(modEventBus);
         MinecraftForge.EVENT_BUS.register(this);
-        modEventBus.addListener(this::clientSetup);
-        modEventBus.addListener(this::addCreative);
-        modEventBus.addListener(this::registerRenderers);
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event){
+    private void commonSetup(final FMLCommonSetupEvent event) {
         //LOGGER.info("HELLO FROM COMMON SETUP");
-    }
-
-    @SuppressWarnings("removal")
-    private void clientSetup(final FMLClientSetupEvent event){
-        ItemBlockRenderTypes.setRenderLayer(CENTRIFUGE_BLOCK.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ALLOY_TANK_BLOCK.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ALLOY_GAUGE_BLOCK.get(), RenderType.cutout());
-    }
-
-    void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(CENTRIFUGE_ENTITY.get(), CentrifugeBlockEntityRenderer::new);
-        event.registerBlockEntityRenderer(TANK_BLOCK_ENTITY.get(), TankBlockEntityRenderer::new);
-    }
-
-    // 将离心机添加进创造模式物品栏
-    private void addCreative(BuildCreativeModeTabContentsEvent event){
-        if (event.getTabKey() == CREATIVE_TAB.getKey() ) {
-            event.accept(ROSA_IRON_NUGGET);
-            event.accept(ROSA_IRON_INGOT);
-            event.accept(ROSA_IRON_BLOCK_ITEM);
-            event.accept(MOLTEN_ROSA_IRON_BUCKET);
-            event.accept(CENTRIFUGE_BLOCK_ITEM);
-            event.accept(ALLOY_TANK_BLOCK_ITEM);
-            event.accept(ALLOY_GAUGE_BLOCK_ITEM);
-        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

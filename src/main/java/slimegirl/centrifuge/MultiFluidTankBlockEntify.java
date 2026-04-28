@@ -30,10 +30,10 @@ public class MultiFluidTankBlockEntify extends MantleBlockEntity implements ITan
 
     /* 内容初始化 */
     @SuppressWarnings("WeakerAccess")
-    protected MultiFluidTankBlockEntify(BlockEntityType<?> type, BlockPos pos, BlockState state, int capacity, boolean noFill) {
+    protected MultiFluidTankBlockEntify(BlockEntityType<?> type, BlockPos pos, BlockState state, int capacity, boolean noInsert) {
         super(type, pos, state);
         CAPACITY = capacity;
-        tanks = noFill ? new MultiFluidTank(capacity, this) : new MultiFluidTank2(capacity, this);
+        tanks = noInsert ? new MultiFluidTank_noInsert(capacity, this) : new MultiFluidTank(capacity, this);
         fluidHolder = LazyOptional.of(() -> tanks);
     }
 
@@ -92,20 +92,18 @@ public class MultiFluidTankBlockEntify extends MantleBlockEntity implements ITan
     public void updateTank(CompoundTag nbt) {
         if (nbt.contains("tanks", Tag.TAG_LIST)) {
             tanks.readFromNBT(nbt);
-        } else if (nbt.contains(NBTTags.TANK, Tag.TAG_COMPOUND)) {
-            updateFluidTo(FluidStack.loadFluidStackFromNBT(nbt.getCompound(NBTTags.TANK)));
-        } else {
-            // Old format for backwards compatibility
-            int i = 0;
-            if (nbt.contains("tank" + i, Tag.TAG_COMPOUND)) {
-                while (nbt.contains("tank" + i, Tag.TAG_COMPOUND)) {
-                    CompoundTag tankTag = nbt.getCompound("tank" + i);
-                    tanks.addFluid(FluidStack.loadFluidStackFromNBT(tankTag));
-                    i++;
-                }
-            } else {
-                tanks.setFluid(FluidStack.EMPTY);
-            }
+        }
+        if (nbt.contains(NBTTags.TANK, Tag.TAG_COMPOUND)) {
+            tanks.addFluidFirst(FluidStack.loadFluidStackFromNBT(nbt.getCompound(NBTTags.TANK)));
+        }
+        if (nbt.contains("tank0", Tag.TAG_COMPOUND)) {
+            tanks.readFromNBTOld(nbt);
+        }
+        tanks.sort();
+        if (!(nbt.contains("tanks", Tag.TAG_LIST) ||
+                nbt.contains(NBTTags.TANK, Tag.TAG_COMPOUND) ||
+                nbt.contains("tank0", Tag.TAG_COMPOUND))) {
+            tanks.setFluid(FluidStack.EMPTY);
         }
         //CentrifugeBlockEntity.updateLight(this, tank);
     }
@@ -161,8 +159,8 @@ public class MultiFluidTankBlockEntify extends MantleBlockEntity implements ITan
         return tanks;
     }
 
-    private static class MultiFluidTank2 extends MultiFluidTank {
-        public MultiFluidTank2(int capacity, MantleBlockEntity parent) {
+    private static class MultiFluidTank_noInsert extends MultiFluidTank {
+        public MultiFluidTank_noInsert(int capacity, MantleBlockEntity parent) {
             super(capacity, parent);
         }
 

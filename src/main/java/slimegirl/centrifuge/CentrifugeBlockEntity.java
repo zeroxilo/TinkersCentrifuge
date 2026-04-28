@@ -14,14 +14,13 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.util.BlockEntityHelper;
-import slimeknights.tconstruct.library.recipe.FluidValues;
+import slimeknights.tconstruct.smeltery.block.entity.ChannelBlockEntity;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CentrifugeBlockEntity extends MultiFluidTankBlockEntify {
-    public static final int CAPACITY = FluidValues.INGOT * 48;
     protected final AntiAlloyModule antiAlloyModule;
     protected AntiAlloyRecipe currentRecipe;
     protected int timer = 0;
@@ -42,7 +41,7 @@ public class CentrifugeBlockEntity extends MultiFluidTankBlockEntify {
     
 
     public CentrifugeBlockEntity(BlockPos pos, BlockState state) {
-        super(TinkersCentrifuge.CENTRIFUGE_ENTITY.get(), pos, state, CAPACITY, false);
+        super(TinkersCentrifuge.CENTRIFUGE_ENTITY.get(), pos, state, CentrifugeBlock.CAPACITY, true);
         antiAlloyModule = new AntiAlloyModule(this.getLevel());
     }
 
@@ -154,7 +153,12 @@ public class CentrifugeBlockEntity extends MultiFluidTankBlockEntify {
         if (pushOutTimer.tick()) { // don't do it every tick
             pushOutTimer.reset(() -> {
                 AtomicBoolean status = new AtomicBoolean(false);
-                findFluidHandler(Direction.DOWN).ifPresent(transferTarget -> {
+                Direction side = Direction.DOWN;
+                BlockEntity be = level.getBlockEntity(worldPosition.relative(side));
+                if (be instanceof ChannelBlockEntity) { // 防断流
+                    status.set(true);
+                }
+                findFluidHandler(be, side).ifPresent(transferTarget -> {
                     if (!tanks.isEmpty()) {
                         for (int index = 0; index < tanks.getSize(); index++) {
                             FluidStack output = tanks.getFluidInTank(index);
@@ -189,7 +193,10 @@ public class CentrifugeBlockEntity extends MultiFluidTankBlockEntify {
     //寻找流体容器
     private LazyOptional<IFluidHandler> findFluidHandler(Direction side) {
         assert level != null;
-        BlockEntity te = level.getBlockEntity(worldPosition.relative(side));
+        return findFluidHandler(level.getBlockEntity(worldPosition.relative(side)), side);
+    }
+
+    private LazyOptional<IFluidHandler> findFluidHandler(BlockEntity te, Direction side) {
         if (te != null) {
             LazyOptional<IFluidHandler> handler = te.getCapability(ForgeCapabilities.FLUID_HANDLER, side.getOpposite());
             if (handler.isPresent()) {
