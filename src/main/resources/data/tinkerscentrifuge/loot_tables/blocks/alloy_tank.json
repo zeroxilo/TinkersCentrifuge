@@ -13,11 +13,7 @@
               "source": "block_entity"
             },
             {
-              "function": "minecraft:copy_nbt",
-              "ops": [
-                {"op": "replace","source": "tank","target": "tank"}
-              ],
-              "source": "block_entity"
+              "function": "tinkerscentrifuge:split_centrifuge_tanks"
             }
           ],
           "name": "tinkerscentrifuge:alloy_tank"

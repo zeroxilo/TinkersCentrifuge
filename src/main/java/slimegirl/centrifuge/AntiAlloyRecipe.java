@@ -141,7 +141,7 @@ public class AntiAlloyRecipe implements ICustomOutputRecipe<IAntiAlloyTank>{
     //配方解析器关联
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return TinkersCentrifuge.antiAlloyingSerializer.get();
+        return TinkersCentrifuge.ANTI_ALLOYING_SERIALIZER.get();
     }
 
     //获取配方类型

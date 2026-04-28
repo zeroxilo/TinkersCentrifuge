@@ -46,6 +46,10 @@ public class MultiFluidTank extends FluidTankAnimated {
       fluids.add(stack);
    }
 
+   public void addFluidFirst(FluidStack stack) {
+      fluids.add(0, stack);
+   }
+
    public FluidStack getFluid(int index) {
       return fluids.get(index);
    }
@@ -67,6 +71,19 @@ public class MultiFluidTank extends FluidTankAnimated {
       }
       sort();
       return this;
+   }
+
+   // Old format for backwards compatibility
+   public void readFromNBTOld(CompoundTag nbt) {
+      if (nbt.contains("tank0", Tag.TAG_COMPOUND)) {
+         int i = 0;
+         while (nbt.contains("tank" + i, Tag.TAG_COMPOUND)) {
+            CompoundTag tankTag = nbt.getCompound("tank" + i);
+            addFluid(FluidStack.loadFluidStackFromNBT(tankTag));
+            i++;
+         }
+         sort();
+      }
    }
 
    //写入nbt
@@ -266,7 +283,18 @@ public class MultiFluidTank extends FluidTankAnimated {
 
    //流体排序，让流体全部往前稍稍，挤占空位
    public void sort(){
-      this.fluids.removeIf(FluidStack::isEmpty);
+      List<FluidStack> copy = List.copyOf(fluids);
+      clearFluids();
+      for (FluidStack stack : copy) {
+         if (!stack.isEmpty()) {
+            int index = findTankIndex(stack.getFluid());
+            if (index != -1) {
+               this.getFluid(index).grow(stack.getAmount());
+            } else {
+               addFluid(stack);
+            }
+         }
+      }
    }
 
    //设置某一容器的流体

@@ -3,6 +3,8 @@
     "block.tinkerscentrifuge.centrifuge" : "Alloy Centrifuge",
     "block.tinkerscentrifuge.alloy_tank" : "Alloy Tank (W.I.P.)",
     "block.tinkerscentrifuge.alloy_gauge" : "Alloy Gauge (W.I.P.)",
+
+	"tooltip.tinkerscentrifuge.more_fluids": "+ %s more fluids",
 	
     "item.tinkerscentrifuge.rosa_iron_ingot" : "Rosa Iron Ingot",
     "item.tinkerscentrifuge.rosa_iron_nugget" : "Rosa Iron Nugget",

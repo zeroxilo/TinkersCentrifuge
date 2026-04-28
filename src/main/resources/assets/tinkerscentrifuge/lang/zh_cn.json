@@ -4,6 +4,8 @@
     "block.tinkerscentrifuge.alloy_tank" : "合金储罐（W.I.P.）",
     "block.tinkerscentrifuge.alloy_gauge" : "合金量器（W.I.P.）",
 
+    "tooltip.tinkerscentrifuge.more_fluids": "+ %s 种流体",
+
     "item.tinkerscentrifuge.rosa_iron_ingot" : "月季铁锭",
     "item.tinkerscentrifuge.rosa_iron_nugget" : "月季铁粒",
     "block.tinkerscentrifuge.rosa_iron_block" : "月季铁块",

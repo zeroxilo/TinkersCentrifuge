@@ -12,11 +12,11 @@ import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 
 import java.util.List;
 
-public class CentrifugeBlockEntityRenderer implements BlockEntityRenderer<CentrifugeBlockEntity> {
-   public CentrifugeBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
-   }
+public class MultiFluidTankBlockEntityRenderer implements BlockEntityRenderer<MultiFluidTankBlockEntify> {
+    public MultiFluidTankBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
+    }
 
-    public void render(CentrifugeBlockEntity tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLightIn, int combinedOverlayIn) {
+    public void render(MultiFluidTankBlockEntify tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLightIn, int combinedOverlayIn) {
         if (!(Boolean) Config.CLIENT.tankFluidModel.get()) {
             // 1. 获取所有流体
             List<FluidStack> fluids = tile.tanks.getFluids();
@@ -62,5 +62,5 @@ public class CentrifugeBlockEntityRenderer implements BlockEntityRenderer<Centri
                 curY += h;
             }
         }
-   }
+    }
 }
