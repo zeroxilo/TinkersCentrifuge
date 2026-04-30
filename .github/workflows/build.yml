@@ -37,3 +37,7 @@ jobs:
           curseforge-id: 1485714
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          curseforge-dependencies: |
+            mantle | depends | *
+            tinkers-construct | depends | *
+          changelog-file: CHANGELOG.md
